@@ -1,3 +1,4 @@
+
 ### enerlinq-timesheets
 
 time tracking and timesheet management.
@@ -8,7 +9,7 @@ You can install this app using the [bench](https://github.com/frappe/bench) CLI:
 
 ```bash
 cd $PATH_TO_YOUR_BENCH
-bench get-app $URL_OF_THIS_REPO --branch develop
+bench get-app $URL_OF_THIS_REPO --branch main
 bench install-app enerlinq_timesheets
 ```
 
@@ -31,3 +32,6 @@ Pre-commit is configured to use the following tools for checking and formatting 
 ### License
 
 agpl-3.0
+
+# enerlinq-timesheet
+
