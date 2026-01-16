@@ -1,0 +1,8 @@
+---
+import Layout from '../layouts/Layout.astro';
+import HomeView from '../components/views/HomeView.vue';
+---
+
+<Layout title="Enerlinq - Timesheet Dashboard">
+  <HomeView client:only="vue" />
+</Layout>

@@ -1,0 +1,65 @@
+---
+import AppHeader from "@/components/AppHeader.vue";
+import Sidebar from "@/components/Sidebar.astro";
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+
+export interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Enerlinq Timesheet Management" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <title>{title}</title>
+
+    <!-- App Context Meta Tags -->
+    <meta name="app:csrf-token" content="{{ csrf_token }}" />
+    <meta name="app:site-name" content="{{ site_name }}" />
+    <meta name="app:current-route" content="{{ current_route }}" />
+    <meta name="app:user-name" content="{{ user_name }}" />
+    <meta name="app:user-full-name" content="{{ user_full_name }}" />
+    <meta name="app:user-image" content="{{ user_image }}" />
+    <meta name="app:user-initials" content="{{ user_initials }}" />
+
+    <ClientRouter />
+  </head>
+  <body>
+    <!-- DaisyUI 5 Drawer Layout -->
+    <div class="drawer lg:drawer-open">
+      <!-- Hidden checkbox to toggle the drawer -->
+      <input id="app-drawer" type="checkbox" class="drawer-toggle" />
+
+      <!-- Main content area -->
+      <div class="drawer-content flex flex-col">
+        <!-- Header with responsive navbar -->
+        <AppHeader
+          client:only="vue"
+          transition:name="app-header"
+          showMobileMenuButton={true}
+        />
+
+        <!-- Main page content -->
+        <main class="flex-1 p-6 overflow-auto bg-base-100">
+          <slot />
+        </main>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="drawer-side">
+        <label
+          for="app-drawer"
+          aria-label="close sidebar"
+          class="drawer-overlay"></label>
+        <Sidebar transition:name="app-sidebar" />
+      </div>
+    </div>
+  </body>
+</html>

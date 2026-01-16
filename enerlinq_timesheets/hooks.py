@@ -196,8 +196,8 @@ required_apps = ["erpnext"]
 
 # Request Events
 # ----------------
-# before_request = ["enerlinq_timesheets.utils.before_request"]
-# after_request = ["enerlinq_timesheets.utils.after_request"]
+before_request = ["enerlinq.enerlinq.cors.handle_cors"]
+after_request = ["enerlinq.enerlinq.cors.add_cors_headers"]
 
 # Job Events
 # ----------
@@ -238,7 +238,16 @@ required_apps = ["erpnext"]
 # Automatically update python controller files with type annotations for this app.
 # export_python_type_annotations = True
 
+# Add web route for timesheet portal page
+web_routes = [
+    {
+        "from_route": "/timesheet",
+        "to_route": "timesheet"
+    }
+]
+
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+update_website_context = "enerlinq.enerlinq.csrf_token.extend_context"

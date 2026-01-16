@@ -1,0 +1,40 @@
+---
+// LogoutButton component - handles user logout with view transitions support
+---
+
+<li>
+  <button
+    id="logout-button"
+    type="button"
+    class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 w-full text-left"
+  >
+    <span class="material-symbols-rounded text-xl">
+      logout
+    </span>
+    <span class="font-medium">Logout</span>
+  </button>
+</li>
+
+<script>
+  import { logout } from '@/utils/client/api'
+
+  function setupLogoutButton() {
+    const logoutButton = document.getElementById('logout-button')
+
+    if (logoutButton) {
+      logoutButton.addEventListener('click', async (e: Event) => {
+        e.preventDefault()
+        try {
+          await logout()
+        } catch (error) {
+          console.error('Logout failed:', error)
+          // Fallback to direct redirect if API fails
+          window.location.href = '/login?redirect-to=/enerlinq'
+        }
+      })
+    }
+  }
+
+  // Re-run after every view transition navigation
+  document.addEventListener('astro:page-load', setupLogoutButton)
+</script>

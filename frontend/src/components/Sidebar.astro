@@ -1,0 +1,113 @@
+---
+import LogoutButton from './LogoutButton.astro';
+
+// Current route path for active state
+const currentPath = Astro.url.pathname;
+
+// Helper function to check if route is active
+const isActiveRoute = (itemPath: string) => {
+  // For root path, check exact match
+  if (itemPath === '/') {
+    return currentPath === '/enerlinq' || currentPath === '/enerlinq/';
+  }
+
+  // For other paths, check if current path starts with the full enerlinq path
+  const fullPath = `/enerlinq${itemPath}`;
+  return currentPath === fullPath || currentPath.startsWith(fullPath + '/');
+}
+---
+
+<!-- DaisyUI 5 Sidebar Component -->
+<aside class="bg-base-200 text-base-content min-h-full p-4">
+  <!-- Logo/Brand Section -->
+  <div class="flex items-center gap-3 px-4 pb-6 border-b border-base-300 mb-6">
+    <div class="avatar avatar-placeholder">
+      <div class="bg-primary text-primary-content w-10 rounded-lg">
+        <span class="text-lg font-bold">E</span>
+      </div>
+    </div>
+    <div class="flex flex-col">
+      <span class="text-xl font-bold text-base-content">Enerlinq</span>
+      <span class="text-sm text-base-content/70">Timesheet Portal</span>
+    </div>
+  </div>
+
+  <!-- Navigation Menu -->
+  <ul class="menu bg-base-200 rounded-box p-0 gap-1">
+    <!-- Navigation Section -->
+    <li class="menu-title text-base-content/60 font-semibold">
+      <span>Navigation</span>
+    </li>
+
+    <!-- Dashboard -->
+    <li>
+      <a
+        href="/enerlinq/"
+        class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
+          isActiveRoute('/') ? 'active bg-primary text-primary-content' : ''
+        }`}
+      >
+        <span class="material-symbols-rounded text-xl">
+          home
+        </span>
+        <span class="font-medium">Dashboard</span>
+      </a>
+    </li>
+
+    <!-- Timesheets -->
+    <li>
+      <a
+        href="/enerlinq/timesheets"
+        class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
+          isActiveRoute('/timesheets') ? 'active bg-primary text-primary-content' : ''
+        }`}
+      >
+        <span class="material-symbols-rounded text-xl">
+          schedule
+        </span>
+        <span class="font-medium">Timesheets</span>
+      </a>
+    </li>
+
+    <!-- Reports -->
+    <li>
+      <a
+        href="/enerlinq/reports"
+        class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
+          isActiveRoute('/reports') ? 'active bg-primary text-primary-content' : ''
+        }`}
+      >
+        <span class="material-symbols-rounded text-xl">
+          bar_chart
+        </span>
+        <span class="font-medium">Reports</span>
+      </a>
+    </li>
+
+    <!-- Divider -->
+    <div class="divider my-4"></div>
+
+    <!-- Settings Section -->
+    <li class="menu-title text-base-content/60 font-semibold">
+      <span>Settings</span>
+    </li>
+
+    <!-- Preferences -->
+    <li>
+      <a
+        href="/enerlinq/preferences"
+        class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
+          isActiveRoute('/preferences') ? 'active bg-primary text-primary-content' : ''
+        }`}
+      >
+        <span class="material-symbols-rounded text-xl">
+          settings
+        </span>
+        <span class="font-medium">Preferences</span>
+      </a>
+    </li>
+
+    <!-- Logout -->
+    <LogoutButton />
+  </ul>
+</aside>
