@@ -89,16 +89,12 @@ const getTimesheetsHours = async () => {
 
     timesheets.value = timesheetsData.timesheets
 
-    const timesheetMap = {}
-    timesheets.value.forEach(item => {
-
-      if (item.start_date in timesheetMap) {
-        timesheetMap[item.start_date] += item.total_hours
-      } else {
-        timesheetMap[item.start_date] = item.total_hours
-      }
-
-    })
+    const timesheetMap = timesheets.value.reduce((map, item) => {
+      item.time_logs.forEach(log => {
+        map[log.from_time] = (map[log.from_time] || 0) + log.hours
+      })
+      return map
+    }, {})
 
     return JSON.stringify(timesheetMap)
 
