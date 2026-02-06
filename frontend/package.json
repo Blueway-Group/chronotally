@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && yarn run copy-html-files",
-    "copy-html-files": "mkdir -p ../enerlinq/www/enerlinq && bash copy-html-files.sh",
+    "copy-html-files": "mkdir -p ../enerlinq_timesheets/www/chronotally && bash copy-html-files.sh",
     "preview": "astro preview",
     "astro": "astro"
   },

@@ -8,11 +8,11 @@ const currentPath = Astro.url.pathname;
 const isActiveRoute = (itemPath: string) => {
   // For root path, check exact match
   if (itemPath === '/') {
-    return currentPath === '/enerlinq' || currentPath === '/enerlinq/';
+    return currentPath === '/chronotally' || currentPath === '/chronotally/';
   }
 
   // For other paths, check if current path starts with the full enerlinq path
-  const fullPath = `/enerlinq${itemPath}`;
+  const fullPath = `/chronotally${itemPath}`;
   return currentPath === fullPath || currentPath.startsWith(fullPath + '/');
 }
 ---
@@ -42,7 +42,7 @@ const isActiveRoute = (itemPath: string) => {
     <!-- Dashboard -->
     <li>
       <a
-        href="/enerlinq/"
+        href="/chronotally/"
         class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
           isActiveRoute('/') ? 'active bg-primary text-primary-content' : ''
         }`}
@@ -57,7 +57,7 @@ const isActiveRoute = (itemPath: string) => {
     <!-- Timesheets -->
     <li>
       <a
-        href="/enerlinq/timesheets"
+        href="/chronotally/timesheets"
         class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
           isActiveRoute('/timesheets') ? 'active bg-primary text-primary-content' : ''
         }`}
@@ -72,7 +72,7 @@ const isActiveRoute = (itemPath: string) => {
     <!-- Reports -->
     <li>
       <a
-        href="/enerlinq/reports"
+        href="/chronotally/reports"
         class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
           isActiveRoute('/reports') ? 'active bg-primary text-primary-content' : ''
         }`}
@@ -95,7 +95,7 @@ const isActiveRoute = (itemPath: string) => {
     <!-- Preferences -->
     <li>
       <a
-        href="/enerlinq/preferences"
+        href="/chronotally/preferences"
         class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
           isActiveRoute('/preferences') ? 'active bg-primary text-primary-content' : ''
         }`}

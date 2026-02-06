@@ -6,7 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_datetime, nowdate
 
-from enerlinq.enerlinq.utility_datetime import convert_iso_to_localized_datetime, get_system_timezone, to_utc
+from enerlinq_timesheets.enerlinq_timesheets.utility_datetime import convert_iso_to_localized_datetime, get_system_timezone, to_utc
 
 frappe.utils.logger.set_log_level("DEBUG")
 logger = frappe.logger("enerlinq", allow_site=True)

@@ -1,0 +1,1 @@
+import{e as n}from"./generic.api.dp7twHvu.js";import"./appContext.B0FcnOF8.js";function r(){const t=document.getElementById("logout-button");t&&t.addEventListener("click",async o=>{o.preventDefault();try{await n()}catch(e){console.error("Logout failed:",e),window.location.href="/login?redirect-to=/enerlinq"}})}document.addEventListener("astro:page-load",r);

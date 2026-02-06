@@ -11,10 +11,10 @@ const webserver_port = commonSiteConfig.webserver_port;
 export default defineConfig({
   output: 'static',
   integrations: [vue(), mcp()],
-  base: '/enerlinq',
-  outDir: '../enerlinq/public/frontend',
+  base: '/chronotally',
+  outDir: '../enerlinq_timesheets/public/frontend',
   build: {
-    assetsPrefix: '/assets/enerlinq/frontend',
+    assetsPrefix: '/assets/enerlinq_timesheets/frontend',
   },
   server: {
     port: 8080,

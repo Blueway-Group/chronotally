@@ -196,8 +196,8 @@ required_apps = ["erpnext"]
 
 # Request Events
 # ----------------
-before_request = ["enerlinq.enerlinq.cors.handle_cors"]
-after_request = ["enerlinq.enerlinq.cors.add_cors_headers"]
+before_request = ["enerlinq_timesheets.enerlinq_timesheets.cors.handle_cors"]
+after_request = ["enerlinq_timesheets.enerlinq_timesheets.cors.add_cors_headers"]
 
 # Job Events
 # ----------
@@ -250,4 +250,4 @@ web_routes = [
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
-update_website_context = "enerlinq.enerlinq.csrf_token.extend_context"
+update_website_context = "enerlinq_timesheets.enerlinq_timesheets.csrf_token.extend_context"

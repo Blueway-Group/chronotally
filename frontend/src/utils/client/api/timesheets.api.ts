@@ -14,7 +14,7 @@ interface TimesheetListParams {
 // Get Timesheet Stats
 export const getTimesheetStats = async (startDate: string, endDate: string) => {
     try {
-        const response = await api.get('/api/method/enerlinq.enerlinq.api_timesheet.get_timesheet_stats', {
+        const response = await api.get('/api/method/enerlinq_timesheets.enerlinq_timesheets.api_timesheet.get_timesheet_stats', {
             params: {
                 start_date: startDate,
                 end_date: endDate
@@ -30,7 +30,7 @@ export const getTimesheetStats = async (startDate: string, endDate: string) => {
 // Get Timesheet Status Stats
 export const getTimesheetStatusStats = async () => {
     try {
-        const response = await api.get('/api/method/enerlinq.enerlinq.api_timesheet.get_timesheet_status_stats');
+        const response = await api.get('/api/method/enerlinq_timesheets.enerlinq_timesheets.api_timesheet.get_timesheet_status_stats');
         return response.data.message;
     } catch (error) {
         console.error('Error fetching timesheet status stats:', error);
@@ -51,7 +51,7 @@ export const getTimesheetList = async (params: TimesheetListParams = {}) => {
     } = params;
 
     try {
-        const response = await api.get('/api/method/enerlinq.enerlinq.api_timesheet.get_timesheet_list', {
+        const response = await api.get('/api/method/enerlinq_timesheets.enerlinq_timesheets.api_timesheet.get_timesheet_list', {
             params: {
                 start_date: startDate,
                 end_date: endDate,
@@ -71,7 +71,7 @@ export const getTimesheetList = async (params: TimesheetListParams = {}) => {
 
 export const getNewTimesheetData = async () => {
     try {
-        const response = await api.get('/api/method/enerlinq.enerlinq.api_timesheet.get_new_timesheet_data');
+        const response = await api.get('/api/method/enerlinq_timesheets.enerlinq_timesheets.api_timesheet.get_new_timesheet_data');
         return response.data.message;
     } catch (error) {
         console.error('Error fetching new timesheet data:', error);
@@ -82,7 +82,7 @@ export const getNewTimesheetData = async () => {
 // Get Timesheet
 export const getTimesheets = async (startDate: string | null = null, endDate: string | null = null) => {
     try {
-        const response = await api.get('/api/method/enerlinq.enerlinq.api_timesheet.get_timesheets', {
+        const response = await api.get('/api/method/enerlinq_timesheets.enerlinq_timesheets.api_timesheet.get_timesheets', {
             params: {
                 start_date: startDate,
                 end_date: endDate
@@ -136,7 +136,7 @@ export const deleteTimesheet = async (name: string) => {
 // Cancel Timesheet
 export const cancelTimesheet = async (name: string) => {
     try {
-        const response = await api.post('/api/method/enerlinq.enerlinq.api_timesheet.cancel_timesheet',
+        const response = await api.post('/api/method/enerlinq_timesheets.enerlinq_timesheets.api_timesheet.cancel_timesheet',
             {
                 name
             }
@@ -247,7 +247,7 @@ export const getProjectCustomer = async (projectName: string) => {
 // Get Timesheet Settings
 export const getTimesheetSettings = async () => {
     try {
-        const response = await api.get('/api/method/enerlinq.enerlinq.api_timesheet.get_timesheet_settings');
+        const response = await api.get('/api/method/enerlinq_timesheets.enerlinq_timesheets.api_timesheet.get_timesheet_settings');
         return response.data.message;
     } catch (error) {
         console.error('Error fetching timesheet settings:', error);
