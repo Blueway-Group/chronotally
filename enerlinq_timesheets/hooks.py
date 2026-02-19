@@ -1,6 +1,6 @@
 app_name = "enerlinq_timesheets"
-app_title = "enerlinq-timesheets"
-app_publisher = "Enerlinq"
+app_title = "ChronoTally"
+app_publisher = "ChronoTally"
 app_description = "time tracking and timesheet management."
 app_email = "jonaspm@enerlinq.com"
 app_license = "agpl-3.0"

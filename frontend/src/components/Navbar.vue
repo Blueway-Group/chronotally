@@ -28,7 +28,7 @@ defineProps({
 
     <!-- Brand/Title (center) -->
     <div class="navbar-center">
-      <a class="btn btn-ghost text-xl font-bold">Enerlinq</a>
+      <a class="btn btn-ghost text-xl font-bold">ChronoTally</a>
     </div>
 
     <!-- Actions (right side) -->

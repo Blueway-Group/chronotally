@@ -1,5 +1,5 @@
 
-### enerlinq-timesheets
+### ChronoTally
 
 time tracking and timesheet management.
 
@@ -17,5 +17,5 @@ bench install-app enerlinq_timesheets
 
 agpl-3.0
 
-# enerlinq-timesheet
+# ChronoTally
 
