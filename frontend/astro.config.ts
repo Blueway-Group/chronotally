@@ -12,9 +12,9 @@ export default defineConfig({
   output: 'static',
   integrations: [vue(), mcp()],
   base: '/chronotally',
-  outDir: '../enerlinq_timesheets/public/frontend',
+  outDir: '../chronotally/public/frontend',
   build: {
-    assetsPrefix: '/assets/enerlinq_timesheets/frontend',
+    assetsPrefix: '/assets/chronotally/frontend',
   },
   server: {
     port: 8080,

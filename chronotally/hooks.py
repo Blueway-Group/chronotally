@@ -1,4 +1,4 @@
-app_name = "enerlinq_timesheets"
+app_name = "chronotally"
 app_title = "ChronoTally"
 app_publisher = "ChronoTally"
 app_description = "time tracking and timesheet management."
@@ -13,11 +13,11 @@ required_apps = ["erpnext"]
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
 # 	{
-# 		"name": "enerlinq_timesheets",
-# 		"logo": "/assets/enerlinq_timesheets/logo.png",
+# 		"name": "chronotally",
+# 		"logo": "/assets/chronotally/logo.png",
 # 		"title": "enerlinq-timesheets",
-# 		"route": "/enerlinq_timesheets",
-# 		"has_permission": "enerlinq_timesheets.api.permission.has_app_permission"
+# 		"route": "/chronotally",
+# 		"has_permission": "chronotally.api.permission.has_app_permission"
 # 	}
 # ]
 
@@ -25,15 +25,15 @@ required_apps = ["erpnext"]
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/enerlinq_timesheets/css/enerlinq_timesheets.css"
-# app_include_js = "/assets/enerlinq_timesheets/js/enerlinq_timesheets.js"
+# app_include_css = "/assets/chronotally/css/chronotally.css"
+# app_include_js = "/assets/chronotally/js/chronotally.js"
 
 # include js, css files in header of web template
-# web_include_css = "/assets/enerlinq_timesheets/css/enerlinq_timesheets.css"
-# web_include_js = "/assets/enerlinq_timesheets/js/enerlinq_timesheets.js"
+# web_include_css = "/assets/chronotally/css/chronotally.css"
+# web_include_js = "/assets/chronotally/js/chronotally.js"
 
 # include custom scss in every website theme (without file extension ".scss")
-# website_theme_scss = "enerlinq_timesheets/public/scss/website"
+# website_theme_scss = "chronotally/public/scss/website"
 
 # include js, css files in header of web form
 # webform_include_js = {"doctype": "public/js/doctype.js"}
@@ -51,7 +51,7 @@ required_apps = ["erpnext"]
 # Svg Icons
 # ------------------
 # include app icons in desk
-# app_include_icons = "enerlinq_timesheets/public/icons.svg"
+# app_include_icons = "chronotally/public/icons.svg"
 
 # Home Pages
 # ----------
@@ -75,43 +75,43 @@ required_apps = ["erpnext"]
 
 # add methods and filters to jinja environment
 # jinja = {
-# 	"methods": "enerlinq_timesheets.utils.jinja_methods",
-# 	"filters": "enerlinq_timesheets.utils.jinja_filters"
+# 	"methods": "chronotally.utils.jinja_methods",
+# 	"filters": "chronotally.utils.jinja_filters"
 # }
 
 # Installation
 # ------------
 
-# before_install = "enerlinq_timesheets.install.before_install"
-# after_install = "enerlinq_timesheets.install.after_install"
+# before_install = "chronotally.install.before_install"
+# after_install = "chronotally.install.after_install"
 
 # Uninstallation
 # ------------
 
-# before_uninstall = "enerlinq_timesheets.uninstall.before_uninstall"
-# after_uninstall = "enerlinq_timesheets.uninstall.after_uninstall"
+# before_uninstall = "chronotally.uninstall.before_uninstall"
+# after_uninstall = "chronotally.uninstall.after_uninstall"
 
 # Integration Setup
 # ------------------
 # To set up dependencies/integrations with other apps
 # Name of the app being installed is passed as an argument
 
-# before_app_install = "enerlinq_timesheets.utils.before_app_install"
-# after_app_install = "enerlinq_timesheets.utils.after_app_install"
+# before_app_install = "chronotally.utils.before_app_install"
+# after_app_install = "chronotally.utils.after_app_install"
 
 # Integration Cleanup
 # -------------------
 # To clean up dependencies/integrations with other apps
 # Name of the app being uninstalled is passed as an argument
 
-# before_app_uninstall = "enerlinq_timesheets.utils.before_app_uninstall"
-# after_app_uninstall = "enerlinq_timesheets.utils.after_app_uninstall"
+# before_app_uninstall = "chronotally.utils.before_app_uninstall"
+# after_app_uninstall = "chronotally.utils.after_app_uninstall"
 
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config
 
-# notification_config = "enerlinq_timesheets.notifications.get_notification_config"
+# notification_config = "chronotally.notifications.get_notification_config"
 
 # Permissions
 # -----------
@@ -150,39 +150,39 @@ required_apps = ["erpnext"]
 
 # scheduler_events = {
 # 	"all": [
-# 		"enerlinq_timesheets.tasks.all"
+# 		"chronotally.tasks.all"
 # 	],
 # 	"daily": [
-# 		"enerlinq_timesheets.tasks.daily"
+# 		"chronotally.tasks.daily"
 # 	],
 # 	"hourly": [
-# 		"enerlinq_timesheets.tasks.hourly"
+# 		"chronotally.tasks.hourly"
 # 	],
 # 	"weekly": [
-# 		"enerlinq_timesheets.tasks.weekly"
+# 		"chronotally.tasks.weekly"
 # 	],
 # 	"monthly": [
-# 		"enerlinq_timesheets.tasks.monthly"
+# 		"chronotally.tasks.monthly"
 # 	],
 # }
 
 # Testing
 # -------
 
-# before_tests = "enerlinq_timesheets.install.before_tests"
+# before_tests = "chronotally.install.before_tests"
 
 # Overriding Methods
 # ------------------------------
 #
 # override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "enerlinq_timesheets.event.get_events"
+# 	"frappe.desk.doctype.event.event.get_events": "chronotally.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-# 	"Task": "enerlinq_timesheets.task.get_dashboard_data"
+# 	"Task": "chronotally.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
@@ -196,13 +196,13 @@ required_apps = ["erpnext"]
 
 # Request Events
 # ----------------
-before_request = ["enerlinq_timesheets.enerlinq_timesheets.cors.handle_cors"]
-after_request = ["enerlinq_timesheets.enerlinq_timesheets.cors.add_cors_headers"]
+before_request = ["chronotally.chronotally.cors.handle_cors"]
+after_request = ["chronotally.chronotally.cors.add_cors_headers"]
 
 # Job Events
 # ----------
-# before_job = ["enerlinq_timesheets.utils.before_job"]
-# after_job = ["enerlinq_timesheets.utils.after_job"]
+# before_job = ["chronotally.utils.before_job"]
+# after_job = ["chronotally.utils.after_job"]
 
 # User Data Protection
 # --------------------
@@ -232,7 +232,7 @@ after_request = ["enerlinq_timesheets.enerlinq_timesheets.cors.add_cors_headers"
 # --------------------------------
 
 # auth_hooks = [
-# 	"enerlinq_timesheets.auth.validate"
+# 	"chronotally.auth.validate"
 # ]
 
 # Automatically update python controller files with type annotations for this app.
@@ -250,4 +250,4 @@ web_routes = [
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
-update_website_context = "enerlinq_timesheets.enerlinq_timesheets.csrf_token.extend_context"
+update_website_context = "chronotally.chronotally.csrf_token.extend_context"

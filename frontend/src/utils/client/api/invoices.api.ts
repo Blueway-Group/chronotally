@@ -43,7 +43,7 @@ export interface GetInvoicesResponse {
 
 export const createInvoiceFromBillableHours = async (params: CreateInvoiceParams): Promise<CreateInvoiceResponse> => {
   const response = await api.post(
-    '/api/method/enerlinq_timesheets.enerlinq_timesheets.api_timesheet.create_invoice_from_billable_hours',
+    '/api/method/chronotally.chronotally.api_timesheet.create_invoice_from_billable_hours',
     params
   )
   return response.data.message
