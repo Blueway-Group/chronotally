@@ -1,7 +1,7 @@
 [project]
-name = "enerlinq_timesheets"
+name = "ChronoTally"
 authors = [
-    { name = "ChronoTally", email = "jonaspm@enerlinq.com"}
+    { name = "Enerlinq", email = "jonaspm@enerlinq.com"}
 ]
 description = "time tracking and timesheet management."
 requires-python = ">=3.10"
