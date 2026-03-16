@@ -75,8 +75,8 @@ def get_timesheets(start_date=None, end_date=None):
 			)
 			logger.debug(f"Found {len(details)} Timesheet Detail items")
 		except Exception as e:
-			logger.warning(f"Error getting Timesheet Detail: {str(e)}")
-			logger.debug(f"Error getting Timesheet Detail: {str(e)}")
+			logger.warning(f"Error getting Timesheet Detail: {e!s}")
+			logger.debug(f"Error getting Timesheet Detail: {e!s}")
 			continue
 
 		# If no details found, try time_logs
@@ -96,8 +96,8 @@ def get_timesheets(start_date=None, end_date=None):
 						}
 					)
 			except Exception as e:
-				logger.warning(f"Error getting time_logs: {str(e)}")
-				logger.debug(f"Error getting time_logs: {str(e)}")
+				logger.warning(f"Error getting time_logs: {e!s}")
+				logger.debug(f"Error getting time_logs: {e!s}")
 
 		# Log for debugging
 		logger.debug(f"Timesheet: {ts['name']}, Details count: {len(details)}")
@@ -162,7 +162,7 @@ def get_timesheets(start_date=None, end_date=None):
 				logger.debug(f"Created event: {event}")
 
 			except Exception as e:
-				logger.debug(f"Error creating event for timesheet {ts['name']}: {str(e)}")
+				logger.debug(f"Error creating event for timesheet {ts['name']}: {e!s}")
 				continue
 
 	logger.debug(f"Returning {len(events)} events")
@@ -221,7 +221,7 @@ def get_timesheet_stats(start_date=None, end_date=None):
 				if log.hours:
 					total_hours += log.hours
 			except Exception as e:
-				logger.warning(f"Error getting time_logs for {ts['name']}: {str(e)}")
+				logger.warning(f"Error getting time_logs for {ts['name']}: {e!s}")
 				continue
 
 	result = {
@@ -349,7 +349,7 @@ def get_timesheet_list(
 			if hasattr(doc, "time_logs") and doc.time_logs:
 				time_logs = [log.as_dict() for log in doc.time_logs]
 		except Exception as e:
-			logger.warning(f"Error calculating hours for {ts['name']}: {str(e)}")
+			logger.warning(f"Error calculating hours for {ts['name']}: {e!s}")
 
 		tz = get_system_timezone()
 		# Use use_end_of_day parameter: False for start_date (00:00:00), True for end_date (23:59:59)
@@ -362,7 +362,7 @@ def get_timesheet_list(
 			try:
 				project_name = frappe.db.get_value("Project", ts["parent_project"], "project_name") or ""
 			except Exception as e:
-				logger.warning(f"Error fetching project name for {ts['parent_project']}: {str(e)}")
+				logger.warning(f"Error fetching project name for {ts['parent_project']}: {e!s}")
 
 		formatted_ts = {
 			"id": ts["name"],
@@ -430,7 +430,7 @@ def get_timesheet_details(timesheet):
 				if hasattr(project_doc, "customer") and project_doc.customer:
 					result["client"] = project_doc.customer
 			except Exception as e:
-				logger.warning(f"Error fetching project details: {str(e)}")
+				logger.warning(f"Error fetching project details: {e!s}")
 
 		# Get time log details
 		if hasattr(doc, "time_logs") and doc.time_logs:
@@ -446,8 +446,8 @@ def get_timesheet_details(timesheet):
 
 		return result
 	except Exception as e:
-		logger.error(f"Error fetching timesheet details: {str(e)}")
-		frappe.throw(_("Error fetching timesheet details: {0}").format(str(e)))
+		logger.error(f"Error fetching timesheet details: {e!s}")
+		frappe.throw(_("Error fetching timesheet details: {0}").format(f"{e!s}"))
 
 
 @frappe.whitelist(allow_guest=False, methods=["GET"])
@@ -591,7 +591,7 @@ def create_invoice_from_billable_hours(employee, start_date, end_date, customer,
 							}
 						)
 		except Exception as e:
-			logger.error(f"Error processing timesheet {ts['name']}: {str(e)}")
+			logger.error(f"Error processing timesheet {ts['name']}: {e!s}")
 			continue
 
 	if total_billable_hours <= 0:
@@ -666,5 +666,6 @@ def create_invoice_from_billable_hours(employee, start_date, end_date, customer,
 		}
 
 	except Exception as e:
-		logger.error(f"Error creating Sales Invoice: {str(e)}")
-		frappe.throw(_("Error creating Sales Invoice: {0}").format(str(e)))
+		logger.error(f"Error creating Sales Invoice: {e!s}")
+		frappe.throw(_("Error creating Sales Invoice: {0}").format(f"{e!s}"))
+		
