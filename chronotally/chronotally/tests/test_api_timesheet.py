@@ -402,7 +402,6 @@ def _create_test_timesheet():
 		],
 	})
 	ts.insert(ignore_permissions=True)
-	frappe.db.commit()
 	return ts
 
 
@@ -413,6 +412,5 @@ def _cleanup_timesheet(ts):
 		if ts.docstatus == 1:
 			ts.cancel()
 		frappe.delete_doc("Timesheet", ts.name, force=True)
-		frappe.db.commit()
 	except Exception:
 		pass

@@ -1,7 +1,7 @@
 # Copyright (c) 2025, Enerlinq and Contributors
 # See license.txt
 
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -93,18 +93,16 @@ class TestAddCorsHeaders(FrappeTestCase):
 		)
 
 	@patch("chronotally.chronotally.cors.frappe")
-	def test_unknown_origin_in_production_gets_wildcard(self, mock_frappe):
-		"""Unknown origin in non-developer mode should get wildcard."""
+	def test_unknown_origin_in_production_is_rejected(self, mock_frappe):
+		"""Unknown origin in non-developer mode should not be allowed."""
 		mock_frappe.get_request_header.return_value = "http://evil.example.com"
 		mock_frappe.conf.get.return_value = False
 		mock_frappe._dict = frappe._dict
 
 		response = Response()
 		add_cors_headers(response)
-		self.assertEqual(
-			response.headers.get("Access-Control-Allow-Origin"),
-			"*",
-		)
+		# Unknown origins should not receive an Access-Control-Allow-Origin header.
+		self.assertIsNone(response.headers.get("Access-Control-Allow-Origin"))
 
 	def test_none_response_does_not_raise(self):
 		"""Passing None should not raise an error."""
