@@ -21,7 +21,6 @@ from chronotally.chronotally.api_timesheet import (
 	to_iso,
 )
 
-
 class TestToIso(FrappeTestCase):
 	"""Tests for to_iso helper."""
 
@@ -372,6 +371,13 @@ class TestCreateInvoiceFromBillableHours(FrappeTestCase):
 
 def _create_test_timesheet():
 	"""Create a minimal test timesheet for use in tests."""
+	# Ensure Warehouse Type exists
+	if not frappe.db.exists("Warehouse Type", "Transit"):
+		frappe.get_doc({
+			"doctype": "Warehouse Type",
+			"name": "Transit",
+		}).insert(ignore_permissions=True)
+
 	# Get the first available company
 	company = frappe.db.get_value("Company", filters={}, fieldname="name")
 	if not company:
