@@ -16,15 +16,13 @@ def handle_cors():
 
 def add_cors_headers(response=None):
     """Add CORS headers to all responses"""
-    if not response:
+    if response is None:
         return
     
     # Ensure headers object exists
     if not hasattr(response, 'headers') or response.headers is None:
         response.headers = frappe._dict()
     
-    # Get the origin from the request
-    origin = frappe.get_request_header("Origin", "*")
     
     # Allow requests from localhost and common development ports during development
     allowed_origins = [
@@ -44,17 +42,14 @@ def add_cors_headers(response=None):
         "http://frappe.remotehost:8080"
     ]
     
-    # In production, you should specify your actual domain(s)
-    # For now, we'll allow common development origins and the requesting origin
-    if origin in allowed_origins or frappe.conf.get("developer_mode"):
-        cors_origin = origin
-    else:
-        # In production, be more restrictive
-        cors_origin = "*"  # Change this to your actual domain in production
+    # Get the origin from the request
+    origin = frappe.get_request_header("Origin")
+    is_developer_mode = frappe.conf.get("developer_mode", False)
+
+    is_developer_mode = frappe.conf.get("developer_mode", False)
     
     # Set CORS headers
-    response.headers.add("Access-Control-Allow-Origin", cors_origin)
-    response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Frappe-CSRF-Token, X-Requested-With")
-    response.headers.add("Access-Control-Allow-Credentials", "true")
-    response.headers.add("Access-Control-Max-Age", "86400")  # 24 hours
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Max-Age"] = "86400"
