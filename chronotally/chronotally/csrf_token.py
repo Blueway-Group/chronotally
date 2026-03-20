@@ -37,7 +37,6 @@ def extend_context(context):
 		# Generate a fresh CSRF token for this request
 		# This ensures the token is always current and valid
 		csrf_token = frappe.sessions.get_csrf_token()
-		frappe.db.commit()
 
 		# Add no-cache directive to context
 		context.no_cache = 1

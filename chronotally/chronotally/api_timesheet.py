@@ -41,7 +41,7 @@ def append_local_timezone(datetime_string):
 
 
 @frappe.whitelist(allow_guest=False, methods=["GET"])
-def get_timesheets(start_date=None, end_date=None):
+def get_timesheets(start_date: str | None = None, end_date: str | None = None):
 	user = frappe.session.user
 
 	# Resolve system timezone
@@ -174,7 +174,7 @@ def get_timesheets(start_date=None, end_date=None):
 
 
 @frappe.whitelist(allow_guest=False, methods=["POST"])
-def cancel_timesheet(name):
+def cancel_timesheet(name: str | None = None):
 	"""Cancel a submitted timesheet"""
 	doc = frappe.get_doc("Timesheet", name)
 	if doc.owner != frappe.session.user:
@@ -188,7 +188,7 @@ def cancel_timesheet(name):
 
 
 @frappe.whitelist(allow_guest=False, methods=["GET"])
-def get_timesheet_stats(start_date=None, end_date=None):
+def get_timesheet_stats(start_date: str | None = None, end_date: str | None = None):
 	"""Calculate timesheet statistics for the given date range"""
 	user = frappe.session.user
 
@@ -262,7 +262,7 @@ def get_timesheet_status_stats():
 
 @frappe.whitelist(allow_guest=False, methods=["GET"])
 def get_timesheet_list(
-	start_date=None, end_date=None, status_filter=None, limit=20, start=0, employee=None, project=None
+	start_date: str | None = None, end_date: str | None = None, status_filter: str | None = None, limit: int = 20, start: int = 0, employee: str | None = None, project: str | None = None
 ):
 	"""Get timesheet list with filtering and pagination"""
 
@@ -398,7 +398,7 @@ def get_timesheet_list(
 
 
 @frappe.whitelist(allow_guest=False, methods=["GET"])
-def get_timesheet_details(timesheet):
+def get_timesheet_details(timesheet: str | None = None):
 	"""Get detailed information for a specific timesheet"""
 	user = frappe.session.user
 
@@ -492,7 +492,7 @@ def get_timesheet_settings():
 
 
 @frappe.whitelist(allow_guest=False, methods=["POST"])
-def create_invoice_from_billable_hours(employee, start_date, end_date, customer, project, item):
+def create_invoice_from_billable_hours(employee: str | None = None, start_date: str | None = None, end_date: str | None = None, customer: str | None = None, project: str | None = None, item: str | None = None):
 	"""
 	Create a Sales Invoice with the sum of billable hours for a given employee,
 	date range, customer, and project.
