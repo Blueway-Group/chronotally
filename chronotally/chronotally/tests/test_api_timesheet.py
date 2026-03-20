@@ -210,7 +210,7 @@ class TestGetTimesheetList(FrappeTestCase):
 
 	def test_respects_limit(self):
 		frappe.set_user("Administrator")
-		result = get_timesheet_list(limit=5)
+		result = get_timesheet_list(limit="5")
 		self.assertLessEqual(len(result["timesheets"]), 5)
 
 	def test_status_filter_single(self):
