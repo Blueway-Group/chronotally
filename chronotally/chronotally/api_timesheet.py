@@ -261,7 +261,6 @@ def get_timesheet_list(
 	start_date=None, end_date=None, status_filter=None, limit=20, start=0, employee=None, project=None
 ):
 	"""Get timesheet list with filtering and pagination"""
-	user = frappe.session.user
 
 	# Convert string parameters to integers
 	try:

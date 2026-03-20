@@ -5,7 +5,8 @@
 		"es2022": true
 	},
 	"parserOptions": {
-		"sourceType": "module"
+		"sourceType": "module",
+		"ecmaVersion": 2022
 	},
 	"extends": "eslint:recommended",
 	"rules": {
