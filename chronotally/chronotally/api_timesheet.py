@@ -265,8 +265,10 @@ def get_timesheet_list(
 	start_date: str | None = None,
 	end_date: str | None = None,
 	status_filter: str | None = None,
-	limit: int = 20,
-	start: int = 0,
+	# limit: int = 20,
+	# start: int = 0,
+	limit: str | None = None,
+	start: str | None = None,
 	employee: str | None = None,
 	project: str | None = None,
 ):
