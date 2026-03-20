@@ -239,12 +239,7 @@ after_request = ["chronotally.chronotally.cors.add_cors_headers"]
 # export_python_type_annotations = True
 
 # Add web route for timesheet portal page
-web_routes = [
-    {
-        "from_route": "/timesheet",
-        "to_route": "timesheet"
-    }
-]
+web_routes = [{"from_route": "/timesheet", "to_route": "timesheet"}]
 
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs

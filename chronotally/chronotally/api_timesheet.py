@@ -6,7 +6,11 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_datetime, nowdate
 
-from chronotally.chronotally.utility_datetime import convert_iso_to_localized_datetime, get_system_timezone, to_utc
+from chronotally.chronotally.utility_datetime import (
+	convert_iso_to_localized_datetime, 
+	get_system_timezone, 
+	to_utc
+)
 
 frappe.utils.logger.set_log_level("DEBUG")
 logger = frappe.logger("chronotally", allow_site=True)

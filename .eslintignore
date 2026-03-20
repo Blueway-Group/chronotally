@@ -2,3 +2,4 @@ dist/
 build/
 *.min.js
 chronotally/public/frontend/
+chronotally/www/chronotally/

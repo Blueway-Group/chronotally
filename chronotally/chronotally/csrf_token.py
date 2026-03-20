@@ -1,7 +1,8 @@
-import frappe
-from frappe.utils import get_abbr
 import os
 import json
+
+import frappe
+from frappe.utils import get_abbr
 
 # Disable caching for this page
 no_cache = 1
@@ -23,9 +24,7 @@ def extend_context(context):
 		# Check if user has permission to create Sales Invoices
 		# This is the key permission check for accessing the reports/invoicing page
 		has_invoice_permission = frappe.has_permission(
-			doctype="Sales Invoice",
-			ptype="create",
-			user=frappe.session.user
+			doctype="Sales Invoice", ptype="create", user=frappe.session.user
 		)
 	
 		if frappe.session.user == "Guest":
