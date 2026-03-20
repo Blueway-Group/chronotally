@@ -262,7 +262,13 @@ def get_timesheet_status_stats():
 
 @frappe.whitelist(allow_guest=False, methods=["GET"])
 def get_timesheet_list(
-	start_date: str | None = None, end_date: str | None = None, status_filter: str | None = None, limit: int = 20, start: int = 0, employee: str | None = None, project: str | None = None
+	start_date: str | None = None,
+	end_date: str | None = None,
+	status_filter: str | None = None,
+	limit: int = 20,
+	start: int = 0,
+	employee: str | None = None,
+	project: str | None = None,
 ):
 	"""Get timesheet list with filtering and pagination"""
 
@@ -492,7 +498,14 @@ def get_timesheet_settings():
 
 
 @frappe.whitelist(allow_guest=False, methods=["POST"])
-def create_invoice_from_billable_hours(employee: str | None = None, start_date: str | None = None, end_date: str | None = None, customer: str | None = None, project: str | None = None, item: str | None = None):
+def create_invoice_from_billable_hours(
+	employee: str | None = None,
+	start_date: str | None = None,
+	end_date: str | None = None,
+	customer: str | None = None,
+	project: str | None = None,
+	item: str | None = None,
+):
 	"""
 	Create a Sales Invoice with the sum of billable hours for a given employee,
 	date range, customer, and project.
