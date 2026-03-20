@@ -21,6 +21,7 @@ from chronotally.chronotally.api_timesheet import (
 	to_iso,
 )
 
+
 class TestToIso(FrappeTestCase):
 	"""Tests for to_iso helper."""
 
@@ -251,13 +252,13 @@ class TestGetTimesheetList(FrappeTestCase):
 			if result["timesheets"]:
 				item = result["timesheets"][0]
 				expected_keys = {
-					"id", 
-					"name", 
-					"status", 
-					"start_date", 
+					"id",
+					"name",
+					"status",
+					"start_date",
 					"end_date",
-					"total_hours", 
-					"company", 
+					"total_hours",
+					"company",
 					"time_logs",
 				}
 				self.assertTrue(expected_keys.issubset(set(item.keys())))
@@ -383,6 +384,7 @@ class TestCreateInvoiceFromBillableHours(FrappeTestCase):
 
 # ── Test Helpers ─────────────────────────────────────────────────────────────
 
+
 def _create_test_timesheet():
 	"""Create a minimal test timesheet for use in tests."""
 	# Ensure Warehouse Type exists
@@ -405,7 +407,9 @@ def _create_test_timesheet():
 					"default_currency": "USD",
 					"country": "United States",
 				}
-			).insert(ignore_permissions=True).name
+			)
+			.insert(ignore_permissions=True)
+			.name
 		)
 
 	# Ensure Activity Type exists

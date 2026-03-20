@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 import frappe
 from frappe.utils import get_abbr
@@ -20,13 +20,12 @@ def extend_context(context):
 	current_path = frappe.request.path
 
 	if current_path.startswith("/chronotally"):
-
 		# Check if user has permission to create Sales Invoices
 		# This is the key permission check for accessing the reports/invoicing page
 		has_invoice_permission = frappe.has_permission(
 			doctype="Sales Invoice", ptype="create", user=frappe.session.user
 		)
-	
+
 		if frappe.session.user == "Guest":
 			frappe.local.flags.redirect_location = "/login?redirect-to=" + current_path
 			raise frappe.Redirect

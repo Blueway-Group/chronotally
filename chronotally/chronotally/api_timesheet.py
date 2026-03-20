@@ -7,9 +7,9 @@ from frappe.model.document import Document
 from frappe.utils import get_datetime, nowdate
 
 from chronotally.chronotally.utility_datetime import (
-	convert_iso_to_localized_datetime, 
-	get_system_timezone, 
-	to_utc
+	convert_iso_to_localized_datetime,
+	get_system_timezone,
+	to_utc,
 )
 
 frappe.utils.logger.set_log_level("DEBUG")
@@ -273,7 +273,7 @@ def get_timesheet_list(
 	except (ValueError, TypeError):
 		limit = 20
 		start = 0
-	
+
 	# Build filters
 	filters = {}
 
@@ -671,4 +671,3 @@ def create_invoice_from_billable_hours(employee, start_date, end_date, customer,
 	except Exception as e:
 		logger.error(f"Error creating Sales Invoice: {e!s}")
 		frappe.throw(_("Error creating Sales Invoice: {0}").format(f"{e!s}"))
-		

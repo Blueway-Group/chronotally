@@ -7,9 +7,9 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-      # - id: trailing-whitespace
-      #   files: "chronotally.*"
-      #   exclude: ".*json$|.*txt$|.*csv|.*md|.*svg"
+      - id: trailing-whitespace
+        files: "chronotally.*"
+        exclude: ".*json$|.*txt$|.*csv|.*md|.*svg"
       - id: check-merge-conflict
       - id: check-ast
       - id: check-json
@@ -24,8 +24,8 @@ repos:
         name: "Run ruff import sorter"
         args: ["--select=I", "--fix"]
 
-      # - id: ruff
-      #   name: "Run ruff linter"
+      - id: ruff
+        name: "Run ruff linter"
 
       - id: ruff-format
         name: "Run ruff formatter"
