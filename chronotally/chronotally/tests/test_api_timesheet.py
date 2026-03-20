@@ -188,7 +188,7 @@ class TestGetTimesheetStatusStats(FrappeTestCase):
 	def test_values_are_non_negative(self):
 		frappe.set_user("Administrator")
 		result = get_timesheet_status_stats()
-		for key, value in result.items():
+		for _key, value in result.items():
 			self.assertGreaterEqual(value, 0)
 
 

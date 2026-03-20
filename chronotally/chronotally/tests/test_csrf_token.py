@@ -67,7 +67,6 @@ class TestExtendContext(FrappeTestCase):
 		mock_frappe.Redirect = frappe.Redirect
 
 		from frappe.utils import get_abbr
-		mock_frappe_utils = MagicMock()
 
 		context = self._make_context()
 		result = extend_context(context)
