@@ -1,3 +1,5 @@
+import json
+
 import frappe
 from frappe import _
 from werkzeug.wrappers import Response
@@ -8,7 +10,8 @@ def handle_cors():
 	if frappe.request and frappe.request.method == "OPTIONS":
 		# Handle preflight OPTIONS request
 		response = Response()
-		response.data = {"message": "OK"}
+		response.data = json.dumps({"message": "OK"}).encode("utf-8")
+		response.content_type = "application/json"
 		response.status_code = 200
 		add_cors_headers(response)
 		frappe.local.response = response
