@@ -274,12 +274,16 @@ def get_timesheet_list(
 ):
 	"""Get timesheet list with filtering and pagination"""
 
-	# Convert string parameters to integers
+	# Convert string parameters to integers independently so a bad/missing
+	# value for one does not reset the other to its default.
 	try:
 		limit = int(limit)
-		start = int(start)
 	except (ValueError, TypeError):
 		limit = 20
+
+	try:
+		start = int(start)
+	except (ValueError, TypeError):
 		start = 0
 
 	# Build filters
