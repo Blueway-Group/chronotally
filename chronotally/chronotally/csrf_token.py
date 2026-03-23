@@ -1,6 +1,3 @@
-import json
-import os
-
 import frappe
 from frappe.utils import get_abbr
 
