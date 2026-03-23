@@ -6,7 +6,11 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_datetime, nowdate
 
-from chronotally.chronotally.utility_datetime import convert_iso_to_localized_datetime, get_system_timezone, to_utc
+from chronotally.chronotally.utility_datetime import (
+	convert_iso_to_localized_datetime,
+	get_system_timezone,
+	to_utc,
+)
 
 frappe.utils.logger.set_log_level("DEBUG")
 logger = frappe.logger("chronotally", allow_site=True)
@@ -37,7 +41,7 @@ def append_local_timezone(datetime_string):
 
 
 @frappe.whitelist(allow_guest=False, methods=["GET"])
-def get_timesheets(start_date=None, end_date=None):
+def get_timesheets(start_date: str | None = None, end_date: str | None = None):
 	user = frappe.session.user
 
 	# Resolve system timezone
@@ -170,8 +174,10 @@ def get_timesheets(start_date=None, end_date=None):
 
 
 @frappe.whitelist(allow_guest=False, methods=["POST"])
-def cancel_timesheet(name):
+def cancel_timesheet(name: str | None = None):
 	"""Cancel a submitted timesheet"""
+	if not name:
+		frappe.throw(_("Timesheet name is required"))
 	doc = frappe.get_doc("Timesheet", name)
 	if doc.owner != frappe.session.user:
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
@@ -184,7 +190,7 @@ def cancel_timesheet(name):
 
 
 @frappe.whitelist(allow_guest=False, methods=["GET"])
-def get_timesheet_stats(start_date=None, end_date=None):
+def get_timesheet_stats(start_date: str | None = None, end_date: str | None = None):
 	"""Calculate timesheet statistics for the given date range"""
 	user = frappe.session.user
 
@@ -258,19 +264,28 @@ def get_timesheet_status_stats():
 
 @frappe.whitelist(allow_guest=False, methods=["GET"])
 def get_timesheet_list(
-	start_date=None, end_date=None, status_filter=None, limit=20, start=0, employee=None, project=None
+	start_date: str | None = None,
+	end_date: str | None = None,
+	status_filter: str | None = None,
+	limit: str | None = None,
+	start: str | None = None,
+	employee: str | None = None,
+	project: str | None = None,
 ):
 	"""Get timesheet list with filtering and pagination"""
-	user = frappe.session.user
 
-	# Convert string parameters to integers
+	# Convert string parameters to integers independently so a bad/missing
+	# value for one does not reset the other to its default.
 	try:
 		limit = int(limit)
-		start = int(start)
 	except (ValueError, TypeError):
 		limit = 20
+
+	try:
+		start = int(start)
+	except (ValueError, TypeError):
 		start = 0
-	
+
 	# Build filters
 	filters = {}
 
@@ -395,7 +410,7 @@ def get_timesheet_list(
 
 
 @frappe.whitelist(allow_guest=False, methods=["GET"])
-def get_timesheet_details(timesheet):
+def get_timesheet_details(timesheet: str | None = None):
 	"""Get detailed information for a specific timesheet"""
 	user = frappe.session.user
 
@@ -489,7 +504,14 @@ def get_timesheet_settings():
 
 
 @frappe.whitelist(allow_guest=False, methods=["POST"])
-def create_invoice_from_billable_hours(employee, start_date, end_date, customer, project, item):
+def create_invoice_from_billable_hours(
+	employee: str | None = None,
+	start_date: str | None = None,
+	end_date: str | None = None,
+	customer: str | None = None,
+	project: str | None = None,
+	item: str | None = None,
+):
 	"""
 	Create a Sales Invoice with the sum of billable hours for a given employee,
 	date range, customer, and project.
@@ -668,4 +690,3 @@ def create_invoice_from_billable_hours(employee, start_date, end_date, customer,
 	except Exception as e:
 		logger.error(f"Error creating Sales Invoice: {e!s}")
 		frappe.throw(_("Error creating Sales Invoice: {0}").format(f"{e!s}"))
-		

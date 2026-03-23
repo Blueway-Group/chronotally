@@ -1,7 +1,7 @@
 # Copyright (c) 2025, Enerlinq and Contributors
 # See license.txt
 
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -67,7 +67,6 @@ class TestExtendContext(FrappeTestCase):
 		mock_frappe.Redirect = frappe.Redirect
 
 		from frappe.utils import get_abbr
-		mock_frappe_utils = MagicMock()
 
 		context = self._make_context()
 		result = extend_context(context)

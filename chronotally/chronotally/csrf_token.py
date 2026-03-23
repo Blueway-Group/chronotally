@@ -1,7 +1,5 @@
 import frappe
 from frappe.utils import get_abbr
-import os
-import json
 
 # Disable caching for this page
 no_cache = 1
@@ -19,15 +17,12 @@ def extend_context(context):
 	current_path = frappe.request.path
 
 	if current_path.startswith("/chronotally"):
-
 		# Check if user has permission to create Sales Invoices
 		# This is the key permission check for accessing the reports/invoicing page
 		has_invoice_permission = frappe.has_permission(
-			doctype="Sales Invoice",
-			ptype="create",
-			user=frappe.session.user
+			doctype="Sales Invoice", ptype="create", user=frappe.session.user
 		)
-	
+
 		if frappe.session.user == "Guest":
 			frappe.local.flags.redirect_location = "/login?redirect-to=" + current_path
 			raise frappe.Redirect
@@ -39,7 +34,6 @@ def extend_context(context):
 		# Generate a fresh CSRF token for this request
 		# This ensures the token is always current and valid
 		csrf_token = frappe.sessions.get_csrf_token()
-		frappe.db.commit()
 
 		# Add no-cache directive to context
 		context.no_cache = 1

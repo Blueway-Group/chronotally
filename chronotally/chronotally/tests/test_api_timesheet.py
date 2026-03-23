@@ -65,13 +65,15 @@ class TestGetTimesheets(FrappeTestCase):
 		self.test_user = "test@example.com"
 		# Create test user if it doesn't exist
 		if not frappe.db.exists("User", self.test_user):
-			frappe.get_doc({
-				"doctype": "User",
-				"email": self.test_user,
-				"first_name": "Test",
-				"last_name": "User",
-				"user_type": "Website User",
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": self.test_user,
+					"first_name": "Test",
+					"last_name": "User",
+					"user_type": "Website User",
+				}
+			).insert(ignore_permissions=True)
 
 	def test_returns_list(self):
 		"""get_timesheets should return a list when given a valid date range."""
@@ -130,13 +132,15 @@ class TestCancelTimesheet(FrappeTestCase):
 
 		test_user = "other_user@example.com"
 		if not frappe.db.exists("User", test_user):
-			frappe.get_doc({
-				"doctype": "User",
-				"email": test_user,
-				"first_name": "Other",
-				"last_name": "User",
-				"user_type": "Website User",
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": test_user,
+					"first_name": "Other",
+					"last_name": "User",
+					"user_type": "Website User",
+				}
+			).insert(ignore_permissions=True)
 
 		try:
 			frappe.set_user(test_user)
@@ -189,7 +193,7 @@ class TestGetTimesheetStatusStats(FrappeTestCase):
 	def test_values_are_non_negative(self):
 		frappe.set_user("Administrator")
 		result = get_timesheet_status_stats()
-		for key, value in result.items():
+		for _key, value in result.items():
 			self.assertGreaterEqual(value, 0)
 
 
@@ -206,7 +210,7 @@ class TestGetTimesheetList(FrappeTestCase):
 
 	def test_respects_limit(self):
 		frappe.set_user("Administrator")
-		result = get_timesheet_list(limit=5)
+		result = get_timesheet_list(limit="5")
 		self.assertLessEqual(len(result["timesheets"]), 5)
 
 	def test_status_filter_single(self):
@@ -248,8 +252,14 @@ class TestGetTimesheetList(FrappeTestCase):
 			if result["timesheets"]:
 				item = result["timesheets"][0]
 				expected_keys = {
-					"id", "name", "status", "start_date", "end_date",
-					"total_hours", "company", "time_logs",
+					"id",
+					"name",
+					"status",
+					"start_date",
+					"end_date",
+					"total_hours",
+					"company",
+					"time_logs",
 				}
 				self.assertTrue(expected_keys.issubset(set(item.keys())))
 		finally:
@@ -283,13 +293,15 @@ class TestGetTimesheetDetails(FrappeTestCase):
 
 		test_user = "noperm_user@example.com"
 		if not frappe.db.exists("User", test_user):
-			frappe.get_doc({
-				"doctype": "User",
-				"email": test_user,
-				"first_name": "NoPerm",
-				"last_name": "User",
-				"user_type": "Website User",
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": test_user,
+					"first_name": "NoPerm",
+					"last_name": "User",
+					"user_type": "Website User",
+				}
+			).insert(ignore_permissions=True)
 
 		try:
 			frappe.set_user(test_user)
@@ -315,13 +327,15 @@ class TestGetNewTimesheetData(FrappeTestCase):
 		"""User without employee record should get 'Guest User' as name."""
 		test_user = "no_employee@example.com"
 		if not frappe.db.exists("User", test_user):
-			frappe.get_doc({
-				"doctype": "User",
-				"email": test_user,
-				"first_name": "No",
-				"last_name": "Employee",
-				"user_type": "Website User",
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": test_user,
+					"first_name": "No",
+					"last_name": "Employee",
+					"user_type": "Website User",
+				}
+			).insert(ignore_permissions=True)
 
 		frappe.set_user(test_user)
 		result = get_new_timesheet_data()
@@ -370,39 +384,58 @@ class TestCreateInvoiceFromBillableHours(FrappeTestCase):
 
 # ── Test Helpers ─────────────────────────────────────────────────────────────
 
+
 def _create_test_timesheet():
 	"""Create a minimal test timesheet for use in tests."""
+	# Ensure Warehouse Type exists
+	if not frappe.db.exists("Warehouse Type", "Transit"):
+		frappe.get_doc(
+			{
+				"doctype": "Warehouse Type",
+				"name": "Transit",
+			}
+		).insert(ignore_permissions=True)
+
 	# Get the first available company
 	company = frappe.db.get_value("Company", filters={}, fieldname="name")
 	if not company:
-		company = frappe.get_doc({
-			"doctype": "Company",
-			"company_name": "Test Company CT",
-			"default_currency": "USD",
-			"country": "United States",
-		}).insert(ignore_permissions=True).name
+		company = (
+			frappe.get_doc(
+				{
+					"doctype": "Company",
+					"company_name": "Test Company CT",
+					"default_currency": "USD",
+					"country": "United States",
+				}
+			)
+			.insert(ignore_permissions=True)
+			.name
+		)
 
 	# Ensure Activity Type exists
 	if not frappe.db.exists("Activity Type", "Testing"):
-		frappe.get_doc({
-			"doctype": "Activity Type",
-			"activity_type": "Testing",
-		}).insert(ignore_permissions=True)
-
-	ts = frappe.get_doc({
-		"doctype": "Timesheet",
-		"company": company,
-		"time_logs": [
+		frappe.get_doc(
 			{
+				"doctype": "Activity Type",
 				"activity_type": "Testing",
-				"from_time": "2025-06-15 09:00:00",
-				"to_time": "2025-06-15 17:00:00",
-				"hours": 8,
 			}
-		],
-	})
+		).insert(ignore_permissions=True)
+
+	ts = frappe.get_doc(
+		{
+			"doctype": "Timesheet",
+			"company": company,
+			"time_logs": [
+				{
+					"activity_type": "Testing",
+					"from_time": "2025-06-15 09:00:00",
+					"to_time": "2025-06-15 17:00:00",
+					"hours": 8,
+				}
+			],
+		}
+	)
 	ts.insert(ignore_permissions=True)
-	frappe.db.commit()
 	return ts
 
 
@@ -413,6 +446,5 @@ def _cleanup_timesheet(ts):
 		if ts.docstatus == 1:
 			ts.cancel()
 		frappe.delete_doc("Timesheet", ts.name, force=True)
-		frappe.db.commit()
 	except Exception:
 		pass
