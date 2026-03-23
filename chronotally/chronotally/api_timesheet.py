@@ -176,6 +176,8 @@ def get_timesheets(start_date: str | None = None, end_date: str | None = None):
 @frappe.whitelist(allow_guest=False, methods=["POST"])
 def cancel_timesheet(name: str | None = None):
 	"""Cancel a submitted timesheet"""
+	if not name:
+		frappe.throw(_("Timesheet name is required"))
 	doc = frappe.get_doc("Timesheet", name)
 	if doc.owner != frappe.session.user:
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
