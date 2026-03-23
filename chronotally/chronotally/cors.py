@@ -46,12 +46,13 @@ def add_cors_headers(response=None):
 	origin = frappe.get_request_header("Origin")
 	is_developer_mode = frappe.conf.get("developer_mode", False)
 
-	# In developer mode, allow any origin
-	if is_developer_mode:
-		response.headers["Access-Control-Allow-Origin"] = origin
-	# In production, only allow known origins
-	elif origin in allowed_origins:
-		response.headers["Access-Control-Allow-Origin"] = origin
+	# In developer mode, allow any origin (when provided).
+	# In production, only allow known origins.
+	if origin:
+		if is_developer_mode:
+			response.headers["Access-Control-Allow-Origin"] = origin
+		elif origin in allowed_origins:
+			response.headers["Access-Control-Allow-Origin"] = origin
 
 	# Set CORS headers
 	response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
