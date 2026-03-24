@@ -2,7 +2,7 @@ app_name = "chronotally"
 app_title = "ChronoTally"
 app_publisher = "ChronoTally"
 app_description = "time tracking and timesheet management."
-app_email = "jonaspm@enerlinq.com"
+app_email = "contacto@enerlinq.com"
 app_license = "agpl-3.0"
 
 # Apps
