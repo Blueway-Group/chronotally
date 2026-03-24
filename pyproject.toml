@@ -1,7 +1,7 @@
 [project]
 name = "chronotally"
 authors = [
-    { name = "Enerlinq", email = "jonaspm@enerlinq.com"}
+    { name = "Enerlinq", email = "contacto@enerlinq.com"}
 ]
 description = "time tracking and timesheet management."
 requires-python = ">=3.10"
