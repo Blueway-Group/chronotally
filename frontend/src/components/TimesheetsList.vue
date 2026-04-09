@@ -319,6 +319,22 @@ const amendTimesheetItem = async (id) => {
   }
 }
 
+const downloadFile = (url, fileName) => {
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+const downloadTimesheet = (timesheet) => {
+  const url = `/api/method/frappe.utils.print_format.download_pdf?doctype=Timesheet&name=${timesheet.id}&format=Standard&no_letterhead=0&letterhead=Autosolutions&settings=%7B%7D&_lang=es-MX`
+
+  const fileName = `timesheet-${timesheet.id}.pdf`
+  downloadFile(url, fileName)
+}
+
 // Load workflow transitions for a timesheet
 const loadWorkflowTransitions = async (timesheet) => {
   try {
@@ -614,6 +630,14 @@ onUnmounted(() => {
                 </WorkflowActions>
 
                 <div class="flex gap-1">
+                  <div class="tooltip" data-tip="Download Timesheet">
+                    <button @click="downloadTimesheet(timesheet)" class="btn btn-sm btn-secondary">
+                      <span class="material-symbols-rounded text-base">
+                        download
+                      </span>
+                      <span class="inline xl:hidden">Download</span>
+                    </button>
+                  </div>
                   <div v-if="timesheet.status === 'Cancelled'" class="tooltip tooltip-info"
                     data-tip="Amend Timesheet">
                     <button @click="amendTimesheetItem(timesheet.id)" class="btn btn-sm btn-info flex-1">
