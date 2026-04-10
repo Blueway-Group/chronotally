@@ -1,0 +1,44 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"FY1qASnnap\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Chronotally</span>\",\"col\":12}},{\"id\":\"i89WiFOj7G\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Chronotally Portal\",\"col\":3}},{\"id\":\"VztCdOJQXN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Timesheet Settings\",\"col\":3}}]",
+ "creation": "2026-04-09 17:26:51.939240",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "milestone",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Chronotally",
+ "links": [],
+ "modified": "2026-04-10 17:09:19.892497",
+ "modified_by": "Administrator",
+ "module": "chronotally",
+ "name": "Chronotally",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 28.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Chronotally Portal",
+   "type": "URL",
+   "url": "http://frappe.remotehost:8000/chronotally"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Timesheet Settings",
+   "link_to": "Timesheet Settings",
+   "type": "DocType"
+  }
+ ],
+ "title": "Chronotally"
+}
