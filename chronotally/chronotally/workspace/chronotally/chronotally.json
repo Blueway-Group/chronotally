@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "ChronoTally",
  "links": [],
- "modified": "2026-04-10 18:09:30.636568",
+ "modified": "2026-04-10 18:16:21.310982",
  "modified_by": "Administrator",
  "module": "chronotally",
  "name": "ChronoTally",
@@ -36,7 +36,7 @@
    "color": "Grey",
    "doc_view": "List",
    "label": "Settings",
-   "link_to": "Timesheet Settings",
+   "link_to": "ChronoTally Settings",
    "type": "DocType"
   }
  ],
