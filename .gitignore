@@ -7,3 +7,5 @@ node_modules
 __pycache__
 .venv
 .ruff_cache
+/chronotally/public/frontend/
+/chronotally/www/chronotally/
