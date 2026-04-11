@@ -1,7 +1,7 @@
 // Copyright (c) 2025, Enerlinq and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Timesheet Settings", {
+// frappe.ui.form.on("ChronoTally Settings", {
 // 	refresh(frm) {
 
 // 	},
