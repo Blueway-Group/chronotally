@@ -113,6 +113,11 @@ const timeLogsByDate = computed(() => {
   return logsByDate
 })
 
+// Helper function to get logs for a specific date
+const getLogsForDate = (date) => {
+  return newTimesheet.value.time_logs.filter(log => log.log_date === date)
+}
+
 // Computed property for total hours
 const totalHours = computed(() => {
   return newTimesheet.value.time_logs.reduce((sum, log) => {
@@ -146,7 +151,7 @@ watch([startDate, endDate], ([newStart, newEnd]) => {
 
   // Remove time logs for dates that are no longer in the range
   newTimesheet.value.time_logs = newTimesheet.value.time_logs.filter(log =>
-    dates.includes(log.log_date)
+    dateRange.value.includes(log.log_date)
   )
 })
 
@@ -249,6 +254,63 @@ const addLog = (date) => {
 
 const deleteLog = (index) => {
   newTimesheet.value.time_logs.splice(index, 1)
+}
+
+// Drag and drop handlers for reordering days
+let draggedDate = null
+
+const handleDragStart = (event, date) => {
+  draggedDate = date
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData('text/html', event.currentTarget.innerHTML)
+}
+
+const handleDragOver = (event) => {
+  if (event.preventDefault) {
+    event.preventDefault()
+  }
+  event.dataTransfer.dropEffect = 'move'
+  return false
+}
+
+const handleDrop = (event, targetDate) => {
+  if (event.stopPropagation) {
+    event.stopPropagation()
+  }
+  
+  if (!draggedDate) return
+  
+  const dates = dateRange.value
+  const draggedIndex = dates.indexOf(draggedDate)
+  const targetIndex = dates.indexOf(targetDate)
+  
+  if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
+    const groups = dates.map(date =>
+      newTimesheet.value.time_logs.filter(log => log.log_date === date)
+    )
+
+    const [movedGroup] = groups.splice(draggedIndex, 1)
+    groups.splice(targetIndex, 0, movedGroup)
+
+    const reorderedLogs = []
+    groups.forEach((group, index) => {
+      const newDate = dates[index]
+      group.forEach(log => {
+        log.log_date = newDate
+        reorderedLogs.push(log)
+      })
+    })
+
+    newTimesheet.value.time_logs = reorderedLogs
+  }
+  
+  draggedDate = null
+  
+  return false
+}
+
+const handleDragEnd = (event) => {
+  draggedDate = null
 }
 
 const updateTimes = (log, date) => {
@@ -417,7 +479,12 @@ const createNewTimesheet = async () => {
             <div
               v-for="date in dateRange"
               :key="date"
-              class="border border-base-300 rounded-box p-4 bg-base-100"
+              class="border border-base-300 rounded-box p-4 bg-base-100 cursor-move"
+              draggable="true"
+              @dragstart="handleDragStart($event, date)"
+              @dragover="handleDragOver"
+              @drop="handleDrop($event, date)"
+              @dragend="handleDragEnd"
             >
               <!-- Date Header -->
               <div class="flex items-center justify-between mb-4">
@@ -436,17 +503,17 @@ const createNewTimesheet = async () => {
                 </button>
               </div>
 
-              <!-- Time Logs for this date -->
               <div v-if="timeLogsByDate[date].length === 0" class="text-sm text-base-content/60 italic">
                 No time logs for this day
               </div>
 
-              <div v-else class="space-y-3">
-                <div
-                  v-for="(log, logIndex) in timeLogsByDate[date]"
-                  :key="`${date}-${logIndex}`"
-                  class="fieldset bg-base-200 border-base-300 rounded-box border p-3"
-                >
+              <div v-else>
+                <div class="space-y-3">
+                  <div
+                    v-for="(log, logIndex) in getLogsForDate(date)"
+                    :key="`${date}-${logIndex}`"
+                    class="fieldset bg-base-200 border-base-300 rounded-box border p-3"
+                  >
                   <div class="flex items-start gap-3">
                     <div class="flex-1 grid grid-cols-1 md:grid-cols-[2fr_auto_3fr] gap-3">
                       <div>
@@ -501,8 +568,9 @@ const createNewTimesheet = async () => {
                     </button>
                   </div>
 
-                  <input v-model="log.from_time" type="hidden"/>
-                  <input v-model="log.to_time" type="hidden"/>
+                    <input v-model="log.from_time" type="hidden"/>
+                    <input v-model="log.to_time" type="hidden"/>
+                  </div>
                 </div>
               </div>
             </div>
