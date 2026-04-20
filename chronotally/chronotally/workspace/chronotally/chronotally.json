@@ -1,0 +1,44 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"FY1qASnnap\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">ChronoTally</span>\",\"col\":12}},{\"id\":\"i89WiFOj7G\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Portal\",\"col\":3}},{\"id\":\"VztCdOJQXN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Settings\",\"col\":3}}]",
+ "creation": "2026-04-09 17:26:51.939240",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "milestone",
+ "idx": 0,
+ "indicator_color": "",
+ "is_hidden": 0,
+ "label": "ChronoTally",
+ "links": [],
+ "modified": "2026-04-10 18:16:21.310982",
+ "modified_by": "Administrator",
+ "module": "chronotally",
+ "name": "ChronoTally",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 28.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Portal",
+   "type": "URL",
+   "url": "/chronotally"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Settings",
+   "link_to": "ChronoTally Settings",
+   "type": "DocType"
+  }
+ ],
+ "title": "ChronoTally"
+}

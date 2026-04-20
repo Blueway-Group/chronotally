@@ -1,11 +1,11 @@
 {
 	"env": {
 		"browser": true,
-		"node": true,
-		"es2022": true
+		"node": true
 	},
 	"parserOptions": {
-		"sourceType": "module"
+		"sourceType": "module",
+		"ecmaVersion": 2022
 	},
 	"extends": "eslint:recommended",
 	"rules": {
@@ -21,7 +21,7 @@
 		"no-unused-vars": "off",
 		"no-console": ["warn"],
 		"no-extra-boolean-cast": ["off"],
-		"no-control-regex": ["off"],
+		"no-control-regex": ["off"]
 	},
 	"root": true,
 	"globals": {
