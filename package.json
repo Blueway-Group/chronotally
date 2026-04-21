@@ -1,6 +1,18 @@
 {
-	"private": true,
+  "name": "chronotally",
+	"description": "The time tracking and timesheet management dashboard.",
+	"version": "0.1.0",
+	"author": "Enerlinq",
+	"homepage": "https://enerlinq.com/projects/chronotally",
 	"type": "module",
+	"repository": {
+	  "type": "git",
+	  "url": "https://github.com/enerlinq/chronotally.git"
+	},
+	"bugs": {
+    "url": "https://github.com/enerlinq/chronotally/issues"
+	},
+	"private": true,
 	"workspaces": [
 		"frontend"
 	],
@@ -9,5 +21,5 @@
 		"dev": "cd frontend && yarn dev",
 		"build": "cd frontend && yarn build"
 	},
-	"license": ""
+	"license": "LGPL-3.0-only"
 }
