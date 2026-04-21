@@ -247,7 +247,7 @@ export const getProjectCustomer = async (projectName: string) => {
 // Get Timesheet Settings
 export const getTimesheetSettings = async () => {
     try {
-        const response = await api.get('/api/method/chronotally.chronotally.api_timesheet.get_timesheet_settings');
+        const response = await api.get('/api/method/chronotally.chronotally.api_timesheet.get_chronotally_settings');
         return response.data.message;
     } catch (error) {
         console.error('Error fetching timesheet settings:', error);
