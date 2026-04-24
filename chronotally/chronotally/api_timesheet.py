@@ -496,7 +496,7 @@ def get_new_timesheet_data():
 
 
 @frappe.whitelist(allow_guest=False, methods=["GET"])
-def get_timesheet_settings():
+def get_chronotally_settings():
 	# Get settings related to timesheets
 	settings = frappe.get_doc("ChronoTally Settings")
 
