@@ -256,11 +256,13 @@ const deleteLog = (index) => {
   newTimesheet.value.time_logs.splice(index, 1)
 }
 
-// Drag and drop handlers for reordering days
-let draggedDate = null
+// Drag and drop handlers for reordering time logs between days
+let draggedLog = null
+let draggedLogIndex = null
 
-const handleDragStart = (event, date) => {
-  draggedDate = date
+const handleDragStart = (event, log, logIndex) => {
+  draggedLog = log
+  draggedLogIndex = logIndex
   event.dataTransfer.effectAllowed = 'move'
   event.dataTransfer.setData('text/html', event.currentTarget.innerHTML)
 }
@@ -278,39 +280,88 @@ const handleDrop = (event, targetDate) => {
     event.stopPropagation()
   }
   
-  if (!draggedDate) return
+  if (!draggedLog) return
   
-  const dates = dateRange.value
-  const draggedIndex = dates.indexOf(draggedDate)
-  const targetIndex = dates.indexOf(targetDate)
+  const draggedGlobalIndex = newTimesheet.value.time_logs.indexOf(draggedLog)
+  if (draggedGlobalIndex === -1) return
   
-  if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
-    const groups = dates.map(date =>
-      newTimesheet.value.time_logs.filter(log => log.log_date === date)
-    )
-
-    const [movedGroup] = groups.splice(draggedIndex, 1)
-    groups.splice(targetIndex, 0, movedGroup)
-
-    const reorderedLogs = []
-    groups.forEach((group, index) => {
-      const newDate = dates[index]
-      group.forEach(log => {
-        log.log_date = newDate
-        reorderedLogs.push(log)
-      })
-    })
-
-    newTimesheet.value.time_logs = reorderedLogs
+  // Different date - move the log
+  if (draggedLog.log_date !== targetDate) {
+    // Remove from original position
+    newTimesheet.value.time_logs.splice(draggedGlobalIndex, 1)
+    
+    // Update the log's date and times
+    draggedLog.log_date = targetDate
+    
+    // Update from_time to match the new date
+    if (draggedLog.from_time) {
+      const timePart = draggedLog.from_time.split(' ')[1] || '00:00:00'
+      draggedLog.from_time = `${targetDate} ${timePart}`
+    }
+    
+    // Update to_time if it exists
+    if (draggedLog.to_time) {
+      const timePart = draggedLog.to_time.split(' ')[1] || '00:00:00'
+      draggedLog.to_time = `${targetDate} ${timePart}`
+    }
+    
+    // Find all logs for the target date and append at the end
+    const targetDateLogs = newTimesheet.value.time_logs.filter(log => log.log_date === targetDate)
+    if (targetDateLogs.length > 0) {
+      const lastTargetLog = targetDateLogs[targetDateLogs.length - 1]
+      const lastTargetIndex = newTimesheet.value.time_logs.indexOf(lastTargetLog)
+      newTimesheet.value.time_logs.splice(lastTargetIndex + 1, 0, draggedLog)
+    } else {
+      newTimesheet.value.time_logs.push(draggedLog)
+    }
+  } else {
+    // Same date reordering - use mouse Y position to find where to insert
+    const dropZoneElement = event.currentTarget // The day container
+    const logElements = Array.from(dropZoneElement.querySelectorAll('[data-log-index]'))
+    
+    if (logElements.length > 1) {
+      const dropY = event.clientY
+      let insertBeforeElement = null
+      
+      // Find which log element the drop is closest to
+      for (const element of logElements) {
+        const rect = element.getBoundingClientRect()
+        const elementMiddle = rect.top + rect.height / 2
+        
+        if (dropY < elementMiddle) {
+          insertBeforeElement = element
+          break
+        }
+      }
+      
+      if (insertBeforeElement && insertBeforeElement !== event.target.closest('[data-log-index]')) {
+        const targetLogIndexAttr = insertBeforeElement.getAttribute('data-log-index')
+        const targetLogGlobalIndex = parseInt(targetLogIndexAttr, 10)
+        
+        if (!isNaN(targetLogGlobalIndex) && targetLogGlobalIndex !== draggedGlobalIndex) {
+          // Remove dragged log
+          newTimesheet.value.time_logs.splice(draggedGlobalIndex, 1)
+          
+          // Adjust target index if needed (if we removed before it)
+          const adjustedTargetIndex = draggedGlobalIndex < targetLogGlobalIndex 
+            ? targetLogGlobalIndex - 1 
+            : targetLogGlobalIndex
+          
+          // Insert at new position
+          newTimesheet.value.time_logs.splice(adjustedTargetIndex, 0, draggedLog)
+        }
+      }
+    }
   }
   
-  draggedDate = null
-  
+  draggedLog = null
+  draggedLogIndex = null
   return false
 }
 
 const handleDragEnd = (event) => {
-  draggedDate = null
+  draggedLog = null
+  draggedLogIndex = null
 }
 
 const updateTimes = (log, date) => {
@@ -479,12 +530,9 @@ const createNewTimesheet = async () => {
             <div
               v-for="date in dateRange"
               :key="date"
-              class="border border-base-300 rounded-box p-4 bg-base-100 cursor-move"
-              draggable="true"
-              @dragstart="handleDragStart($event, date)"
+              class="border border-base-300 rounded-box p-4 bg-base-100"
               @dragover="handleDragOver"
               @drop="handleDrop($event, date)"
-              @dragend="handleDragEnd"
             >
               <!-- Date Header -->
               <div class="flex items-center justify-between mb-4">
@@ -512,7 +560,13 @@ const createNewTimesheet = async () => {
                   <div
                     v-for="(log, logIndex) in getLogsForDate(date)"
                     :key="`${date}-${logIndex}`"
-                    class="fieldset bg-base-200 border-base-300 rounded-box border p-3"
+                    class="fieldset bg-base-200 border-base-300 rounded-box border p-3 cursor-move"
+                    :data-log-index="newTimesheet.time_logs.indexOf(log)"
+                    draggable="true"
+                    @dragstart="handleDragStart($event, log, logIndex)"
+                    @dragover="handleDragOver"
+                    @drop="handleDrop($event, date)"
+                    @dragend="handleDragEnd"
                   >
                   <div class="flex items-start gap-3">
                     <div class="flex-1 grid grid-cols-1 md:grid-cols-[2fr_auto_3fr] gap-3">
