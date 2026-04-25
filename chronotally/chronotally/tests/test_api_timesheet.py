@@ -11,10 +11,10 @@ from chronotally.chronotally.api_timesheet import (
 	append_local_timezone,
 	cancel_timesheet,
 	create_invoice_from_billable_hours,
+	get_chronotally_settings,
 	get_new_timesheet_data,
 	get_timesheet_details,
 	get_timesheet_list,
-	get_timesheet_settings,
 	get_timesheet_stats,
 	get_timesheet_status_stats,
 	get_timesheets,
@@ -344,11 +344,11 @@ class TestGetNewTimesheetData(FrappeTestCase):
 
 
 class TestGetTimesheetSettings(FrappeTestCase):
-	"""Tests for get_timesheet_settings API endpoint."""
+	"""Tests for get_chronotally_settings API endpoint."""
 
 	def test_returns_settings(self):
 		frappe.set_user("Administrator")
-		result = get_timesheet_settings()
+		result = get_chronotally_settings()
 		self.assertIn("default_period", result)
 
 

@@ -113,6 +113,11 @@ const timeLogsByDate = computed(() => {
   return logsByDate
 })
 
+// Helper function to get logs for a specific date
+const getLogsForDate = (date) => {
+  return newTimesheet.value.time_logs.filter(log => log.log_date === date)
+}
+
 // Computed property for total hours
 const totalHours = computed(() => {
   return newTimesheet.value.time_logs.reduce((sum, log) => {
@@ -146,7 +151,7 @@ watch([startDate, endDate], ([newStart, newEnd]) => {
 
   // Remove time logs for dates that are no longer in the range
   newTimesheet.value.time_logs = newTimesheet.value.time_logs.filter(log =>
-    dates.includes(log.log_date)
+    dateRange.value.includes(log.log_date)
   )
 })
 
@@ -249,6 +254,114 @@ const addLog = (date) => {
 
 const deleteLog = (index) => {
   newTimesheet.value.time_logs.splice(index, 1)
+}
+
+// Drag and drop handlers for reordering time logs between days
+let draggedLog = null
+let draggedLogIndex = null
+
+const handleDragStart = (event, log, logIndex) => {
+  draggedLog = log
+  draggedLogIndex = logIndex
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData('text/html', event.currentTarget.innerHTML)
+}
+
+const handleDragOver = (event) => {
+  if (event.preventDefault) {
+    event.preventDefault()
+  }
+  event.dataTransfer.dropEffect = 'move'
+  return false
+}
+
+const handleDrop = (event, targetDate) => {
+  if (event.stopPropagation) {
+    event.stopPropagation()
+  }
+  
+  if (!draggedLog) return
+  
+  const draggedGlobalIndex = newTimesheet.value.time_logs.indexOf(draggedLog)
+  if (draggedGlobalIndex === -1) return
+  
+  // Different date - move the log
+  if (draggedLog.log_date !== targetDate) {
+    // Remove from original position
+    newTimesheet.value.time_logs.splice(draggedGlobalIndex, 1)
+    
+    // Update the log's date and times
+    draggedLog.log_date = targetDate
+    
+    // Update from_time to match the new date
+    if (draggedLog.from_time) {
+      const timePart = draggedLog.from_time.split(' ')[1] || '00:00:00'
+      draggedLog.from_time = `${targetDate} ${timePart}`
+    }
+    
+    // Update to_time if it exists
+    if (draggedLog.to_time) {
+      const timePart = draggedLog.to_time.split(' ')[1] || '00:00:00'
+      draggedLog.to_time = `${targetDate} ${timePart}`
+    }
+    
+    // Find all logs for the target date and append at the end
+    const targetDateLogs = newTimesheet.value.time_logs.filter(log => log.log_date === targetDate)
+    if (targetDateLogs.length > 0) {
+      const lastTargetLog = targetDateLogs[targetDateLogs.length - 1]
+      const lastTargetIndex = newTimesheet.value.time_logs.indexOf(lastTargetLog)
+      newTimesheet.value.time_logs.splice(lastTargetIndex + 1, 0, draggedLog)
+    } else {
+      newTimesheet.value.time_logs.push(draggedLog)
+    }
+  } else {
+    // Same date reordering - use mouse Y position to find where to insert
+    const dropZoneElement = event.currentTarget // The day container
+    const logElements = Array.from(dropZoneElement.querySelectorAll('[data-log-index]'))
+    
+    if (logElements.length > 1) {
+      const dropY = event.clientY
+      let insertBeforeElement = null
+      
+      // Find which log element the drop is closest to
+      for (const element of logElements) {
+        const rect = element.getBoundingClientRect()
+        const elementMiddle = rect.top + rect.height / 2
+        
+        if (dropY < elementMiddle) {
+          insertBeforeElement = element
+          break
+        }
+      }
+      
+      if (insertBeforeElement && insertBeforeElement !== event.target.closest('[data-log-index]')) {
+        const targetLogIndexAttr = insertBeforeElement.getAttribute('data-log-index')
+        const targetLogGlobalIndex = parseInt(targetLogIndexAttr, 10)
+        
+        if (!isNaN(targetLogGlobalIndex) && targetLogGlobalIndex !== draggedGlobalIndex) {
+          // Remove dragged log
+          newTimesheet.value.time_logs.splice(draggedGlobalIndex, 1)
+          
+          // Adjust target index if needed (if we removed before it)
+          const adjustedTargetIndex = draggedGlobalIndex < targetLogGlobalIndex 
+            ? targetLogGlobalIndex - 1 
+            : targetLogGlobalIndex
+          
+          // Insert at new position
+          newTimesheet.value.time_logs.splice(adjustedTargetIndex, 0, draggedLog)
+        }
+      }
+    }
+  }
+  
+  draggedLog = null
+  draggedLogIndex = null
+  return false
+}
+
+const handleDragEnd = (event) => {
+  draggedLog = null
+  draggedLogIndex = null
 }
 
 const updateTimes = (log, date) => {
@@ -418,6 +531,8 @@ const createNewTimesheet = async () => {
               v-for="date in dateRange"
               :key="date"
               class="border border-base-300 rounded-box p-4 bg-base-100"
+              @dragover="handleDragOver"
+              @drop="handleDrop($event, date)"
             >
               <!-- Date Header -->
               <div class="flex items-center justify-between mb-4">
@@ -436,17 +551,23 @@ const createNewTimesheet = async () => {
                 </button>
               </div>
 
-              <!-- Time Logs for this date -->
               <div v-if="timeLogsByDate[date].length === 0" class="text-sm text-base-content/60 italic">
                 No time logs for this day
               </div>
 
-              <div v-else class="space-y-3">
-                <div
-                  v-for="(log, logIndex) in timeLogsByDate[date]"
-                  :key="`${date}-${logIndex}`"
-                  class="fieldset bg-base-200 border-base-300 rounded-box border p-3"
-                >
+              <div v-else>
+                <div class="space-y-3">
+                  <div
+                    v-for="(log, logIndex) in getLogsForDate(date)"
+                    :key="`${date}-${logIndex}`"
+                    class="fieldset bg-base-200 border-base-300 rounded-box border p-3 cursor-move"
+                    :data-log-index="newTimesheet.time_logs.indexOf(log)"
+                    draggable="true"
+                    @dragstart="handleDragStart($event, log, logIndex)"
+                    @dragover="handleDragOver"
+                    @drop="handleDrop($event, date)"
+                    @dragend="handleDragEnd"
+                  >
                   <div class="flex items-start gap-3">
                     <div class="flex-1 grid grid-cols-1 md:grid-cols-[2fr_auto_3fr] gap-3">
                       <div>
@@ -501,8 +622,9 @@ const createNewTimesheet = async () => {
                     </button>
                   </div>
 
-                  <input v-model="log.from_time" type="hidden"/>
-                  <input v-model="log.to_time" type="hidden"/>
+                    <input v-model="log.from_time" type="hidden"/>
+                    <input v-model="log.to_time" type="hidden"/>
+                  </div>
                 </div>
               </div>
             </div>
