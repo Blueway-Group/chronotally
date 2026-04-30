@@ -1,9 +1,12 @@
+# Copyright (c) 2026 Enerlinq. All rights reserved.
+# Licensed under the LGPL-3.0 License. See LICENSE file for details.
+
 app_name = "chronotally"
 app_title = "ChronoTally"
 app_publisher = "ChronoTally"
 app_description = "time tracking and timesheet management."
 app_email = "contacto@enerlinq.com"
-app_license = "agpl-3.0"
+app_license = "lgpl-3.0"
 
 # Apps
 # ------------------

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Enerlinq. All rights reserved.
+// Licensed under the LGPL-3.0 License. See LICENSE file for details.
+
 // Calculate start and end dates for the current week
 export function getWeekDates(date = new Date()) {
     // Create a new date object to avoid modifying the original

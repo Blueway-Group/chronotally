@@ -1,3 +1,8 @@
+<!--
+Copyright (c) 2026 Enerlinq. All rights reserved.
+Licensed under the LGPL-3.0 License. See LICENSE file for details.
+-->
+
 <script setup>
 import { ref, watch, computed } from 'vue'
 import { updateRecord, checkActivityBillable, getRecord } from '../utils/client/api'

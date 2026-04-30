@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Enerlinq. All rights reserved.
+// Licensed under the LGPL-3.0 License. See LICENSE file for details.
+
 export const isValidTimeFormat = (timeStr) => {
   // Accepts "YYYY-MM-DD HH:mm:ss" or "DD-MM-YYYY HH:mm:ss"
   const isoRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;

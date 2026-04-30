@@ -1,3 +1,8 @@
+<!--
+Copyright (c) 2026 Enerlinq. All rights reserved.
+Licensed under the LGPL-3.0 License. See LICENSE file for details.
+-->
+
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { getTimesheetStats, getTimesheetStatusStats, getTimesheetList, updateRecord, deleteTimesheet, cancelTimesheet, getCurrentUserEmployee } from '@/utils/client/api'
