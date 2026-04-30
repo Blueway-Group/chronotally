@@ -15,7 +15,7 @@ bench install-app chronotally
 
 ### License
 
-agpl-3.0
+lgpl-3.0
 
 # ChronoTally
 
