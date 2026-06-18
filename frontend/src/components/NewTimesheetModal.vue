@@ -1,5 +1,11 @@
+<!--
+Copyright (c) 2026 Enerlinq.
+Licensed under the LGPL-3.0 License. See LICENSE file for details.
+-->
+
 <script setup>
 import { ref, watch, computed } from 'vue'
+import Draggable from 'vuedraggable'
 import { createTimesheet, getNewTimesheetData, checkActivityBillable, getRecord } from '../utils/client/api'
 import { validateTimeLogs } from '../utils/client/timeValidation'
 import ComboBox from './ComboBox.vue'
@@ -101,21 +107,57 @@ const dateRange = computed(() => {
   return getDatesBetween(startDate.value, endDate.value)
 })
 
-// Computed property to organize time logs by date
-const timeLogsByDate = computed(() => {
-  const logsByDate = {}
+const logsByDate = ref({})
 
-  // Initialize each date with an empty array
+const generateLogDragId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
+const ensureDragId = (log) => {
+  if (!log._dragId) {
+    log._dragId = generateLogDragId()
+  }
+  return log
+}
+
+const syncLogsByDate = () => {
+  const activeDates = new Set(dateRange.value)
+
   dateRange.value.forEach(date => {
-    logsByDate[date] = newTimesheet.value.time_logs.filter(log => log.log_date === date)
+    const matchingLogs = newTimesheet.value.time_logs.filter(log => log.log_date === date).map(ensureDragId)
+
+    if (!logsByDate.value[date]) {
+      logsByDate.value[date] = matchingLogs
+    } else {
+      logsByDate.value[date].splice(0, logsByDate.value[date].length, ...matchingLogs)
+    }
   })
 
-  return logsByDate
-})
+  Object.keys(logsByDate.value).forEach(date => {
+    if (!activeDates.has(date)) {
+      delete logsByDate.value[date]
+    }
+  })
+}
+
+const flattenLogsByDate = () => {
+  return Object.values(logsByDate.value).flat()
+}
+
+const updateFlatTimeLogs = () => {
+  newTimesheet.value.time_logs = flattenLogsByDate()
+}
+
+const timeLogsByDate = computed(() => logsByDate.value)
+
+watch(() => newTimesheet.value.time_logs, () => {
+  syncLogsByDate()
+}, { deep: true, immediate: true })
+
+watch(dateRange, () => {
+  syncLogsByDate()
+}, { immediate: true })
 
 // Helper function to get logs for a specific date
 const getLogsForDate = (date) => {
-  return newTimesheet.value.time_logs.filter(log => log.log_date === date)
+  return logsByDate.value[date] || []
 }
 
 // Computed property for total hours
@@ -226,21 +268,22 @@ const handleProjectSelect = async (project) => {
   }
 }
 
-const handleActivityTypeSelect = async (activityType, logIndex) => {
-  newTimesheet.value.time_logs[logIndex].activity_type = activityType.name
+const handleActivityTypeSelect = async (activityType, log) => {
+  log.activity_type = activityType.name
 
   // Check if the activity is billable and update the time log
   if (newTimesheet.value.employee) {
     const isBillable = await checkActivityBillable(activityType.name, newTimesheet.value.employee)
-    newTimesheet.value.time_logs[logIndex].is_billable = isBillable
+    log.is_billable = isBillable
   } else {
     // If no employee is selected yet, default to false
-    newTimesheet.value.time_logs[logIndex].is_billable = false
+    log.is_billable = false
   }
 }
 
 const addLog = (date) => {
   newTimesheet.value.time_logs.push({
+    _dragId: generateLogDragId(),
     log_date: date,
     hours: 0,
     activity_type: '',
@@ -252,116 +295,37 @@ const addLog = (date) => {
   })
 }
 
-const deleteLog = (index) => {
-  newTimesheet.value.time_logs.splice(index, 1)
-}
-
-// Drag and drop handlers for reordering time logs between days
-let draggedLog = null
-let draggedLogIndex = null
-
-const handleDragStart = (event, log, logIndex) => {
-  draggedLog = log
-  draggedLogIndex = logIndex
-  event.dataTransfer.effectAllowed = 'move'
-  event.dataTransfer.setData('text/html', event.currentTarget.innerHTML)
-}
-
-const handleDragOver = (event) => {
-  if (event.preventDefault) {
-    event.preventDefault()
+const deleteLog = (log) => {
+  const index = newTimesheet.value.time_logs.indexOf(log)
+  if (index !== -1) {
+    newTimesheet.value.time_logs.splice(index, 1)
   }
-  event.dataTransfer.dropEffect = 'move'
-  return false
 }
 
-const handleDrop = (event, targetDate) => {
-  if (event.stopPropagation) {
-    event.stopPropagation()
+const dragGroup = { name: 'time-logs', pull: true, put: true }
+
+const adjustLogDateTimes = (log, date) => {
+  if (log.from_time) {
+    const timePart = log.from_time.split(' ')[1] || '00:00:00'
+    log.from_time = `${date} ${timePart}`
   }
-  
-  if (!draggedLog) return
-  
-  const draggedGlobalIndex = newTimesheet.value.time_logs.indexOf(draggedLog)
-  if (draggedGlobalIndex === -1) return
-  
-  // Different date - move the log
-  if (draggedLog.log_date !== targetDate) {
-    // Remove from original position
-    newTimesheet.value.time_logs.splice(draggedGlobalIndex, 1)
-    
-    // Update the log's date and times
-    draggedLog.log_date = targetDate
-    
-    // Update from_time to match the new date
-    if (draggedLog.from_time) {
-      const timePart = draggedLog.from_time.split(' ')[1] || '00:00:00'
-      draggedLog.from_time = `${targetDate} ${timePart}`
-    }
-    
-    // Update to_time if it exists
-    if (draggedLog.to_time) {
-      const timePart = draggedLog.to_time.split(' ')[1] || '00:00:00'
-      draggedLog.to_time = `${targetDate} ${timePart}`
-    }
-    
-    // Find all logs for the target date and append at the end
-    const targetDateLogs = newTimesheet.value.time_logs.filter(log => log.log_date === targetDate)
-    if (targetDateLogs.length > 0) {
-      const lastTargetLog = targetDateLogs[targetDateLogs.length - 1]
-      const lastTargetIndex = newTimesheet.value.time_logs.indexOf(lastTargetLog)
-      newTimesheet.value.time_logs.splice(lastTargetIndex + 1, 0, draggedLog)
-    } else {
-      newTimesheet.value.time_logs.push(draggedLog)
-    }
-  } else {
-    // Same date reordering - use mouse Y position to find where to insert
-    const dropZoneElement = event.currentTarget // The day container
-    const logElements = Array.from(dropZoneElement.querySelectorAll('[data-log-index]'))
-    
-    if (logElements.length > 1) {
-      const dropY = event.clientY
-      let insertBeforeElement = null
-      
-      // Find which log element the drop is closest to
-      for (const element of logElements) {
-        const rect = element.getBoundingClientRect()
-        const elementMiddle = rect.top + rect.height / 2
-        
-        if (dropY < elementMiddle) {
-          insertBeforeElement = element
-          break
-        }
-      }
-      
-      if (insertBeforeElement && insertBeforeElement !== event.target.closest('[data-log-index]')) {
-        const targetLogIndexAttr = insertBeforeElement.getAttribute('data-log-index')
-        const targetLogGlobalIndex = parseInt(targetLogIndexAttr, 10)
-        
-        if (!isNaN(targetLogGlobalIndex) && targetLogGlobalIndex !== draggedGlobalIndex) {
-          // Remove dragged log
-          newTimesheet.value.time_logs.splice(draggedGlobalIndex, 1)
-          
-          // Adjust target index if needed (if we removed before it)
-          const adjustedTargetIndex = draggedGlobalIndex < targetLogGlobalIndex 
-            ? targetLogGlobalIndex - 1 
-            : targetLogGlobalIndex
-          
-          // Insert at new position
-          newTimesheet.value.time_logs.splice(adjustedTargetIndex, 0, draggedLog)
-        }
-      }
-    }
+
+  if (log.to_time) {
+    const timePart = log.to_time.split(' ')[1] || '00:00:00'
+    log.to_time = `${date} ${timePart}`
   }
-  
-  draggedLog = null
-  draggedLogIndex = null
-  return false
 }
 
-const handleDragEnd = (event) => {
-  draggedLog = null
-  draggedLogIndex = null
+const handleDraggableChange = (event, date) => {
+  if (event.added) {
+    const movedLog = event.added.element
+    movedLog.log_date = date
+    adjustLogDateTimes(movedLog, date)
+  }
+
+  if (event.moved || event.removed || event.added) {
+    updateFlatTimeLogs()
+  }
 }
 
 const updateTimes = (log, date) => {
@@ -531,8 +495,6 @@ const createNewTimesheet = async () => {
               v-for="date in dateRange"
               :key="date"
               class="border border-base-300 rounded-box p-4 bg-base-100"
-              @dragover="handleDragOver"
-              @drop="handleDrop($event, date)"
             >
               <!-- Date Header -->
               <div class="flex items-center justify-between mb-4">
@@ -551,24 +513,28 @@ const createNewTimesheet = async () => {
                 </button>
               </div>
 
-              <div v-if="timeLogsByDate[date].length === 0" class="text-sm text-base-content/60 italic">
+              <div v-if="(timeLogsByDate[date] || []).length === 0" class="text-sm text-base-content/60 italic">
                 No time logs for this day
               </div>
 
               <div v-else>
-                <div class="space-y-3">
-                  <div
-                    v-for="(log, logIndex) in getLogsForDate(date)"
-                    :key="`${date}-${logIndex}`"
-                    class="fieldset bg-base-200 border-base-300 rounded-box border p-3 cursor-move"
-                    :data-log-index="newTimesheet.time_logs.indexOf(log)"
-                    draggable="true"
-                    @dragstart="handleDragStart($event, log, logIndex)"
-                    @dragover="handleDragOver"
-                    @drop="handleDrop($event, date)"
-                    @dragend="handleDragEnd"
-                  >
-                  <div class="flex items-start gap-3">
+                <Draggable
+                  :list="getLogsForDate(date)"
+                  :group="dragGroup"
+                  item-key="_dragId"
+                  :animation="220"
+                  ghost-class="drag-ghost"
+                  chosen-class="drag-chosen"
+                  drag-class="drag-dragging"
+                  @change="(evt) => handleDraggableChange(evt, date)"
+                  class="space-y-3"
+                >
+                  <template #item="{ element: log, index: logIndex }">
+                    <div
+                      :key="log._dragId"
+                      class="fieldset bg-base-200 border-base-300 rounded-box border p-3 cursor-move draggable-item"
+                    >
+                      <div class="flex items-start gap-3">
                     <div class="flex-1 grid grid-cols-1 md:grid-cols-[2fr_auto_3fr] gap-3">
                       <div>
                         <label class="label label-text text-xs" :for="`activity-${date}-${logIndex}`">Activity</label>
@@ -580,7 +546,7 @@ const createNewTimesheet = async () => {
                           placeholder="Search activity..."
                           :filters="[['disabled', '=', 0]]"
                           :minSearchLength="0"
-                          @select="(activityType) => handleActivityTypeSelect(activityType, newTimesheet.time_logs.indexOf(log))"
+                          @select="(activityType) => handleActivityTypeSelect(activityType, log)"
                         />
                       </div>
 
@@ -613,7 +579,7 @@ const createNewTimesheet = async () => {
                     <button
                       type="button"
                       class="btn btn-sm btn-square btn-error btn-outline mt-6"
-                      @click="deleteLog(newTimesheet.time_logs.indexOf(log))"
+                      @click="deleteLog(log)"
                       title="Delete this time log"
                     >
                       <span class="material-symbols-rounded">
@@ -625,7 +591,8 @@ const createNewTimesheet = async () => {
                     <input v-model="log.from_time" type="hidden"/>
                     <input v-model="log.to_time" type="hidden"/>
                   </div>
-                </div>
+                  </template>
+                </Draggable>
               </div>
             </div>
           </div>
@@ -658,3 +625,24 @@ const createNewTimesheet = async () => {
     </form>
   </dialog>
 </template>
+
+<style scoped>
+.draggable-item {
+  transition: transform 220ms ease, opacity 220ms ease, box-shadow 220ms ease;
+}
+
+.drag-ghost {
+  opacity: 0.7 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 18px 28px rgba(0, 0, 0, 0.12);
+}
+
+.drag-chosen {
+  transform: scale(1.02);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.14);
+}
+
+.drag-dragging {
+  opacity: 0.9;
+}
+</style>

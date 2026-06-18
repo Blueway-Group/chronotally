@@ -1,0 +1,69 @@
+# **Terms of Service and Commercial Use License (SaaS)**
+
+This Commercial License Agreement (hereinafter, the "Agreement") governs access to and use of the web application between **CHRONOTALLY** (hereinafter, the "Licensor") and the natural or legal person contracting the service (hereinafter, the "Licensee").
+
+## **1. Definitions**
+
+For the purposes of this Agreement, the following terms shall have the meanings set forth below:
+
+* **Application:** Refers to the CHRONOTALLY web application, including all its interfaces, source code, security patches, updates, enhancements, and associated technical documentation provided by the Licensor.  
+* **Application Maintenance:** Preventive and corrective tasks performed exclusively by the Licensor to ensure stability, operational availability, and error correction of the Application's base system.  
+* **Implementation:** Any custom development, customization, third-party integrations, data migration, or specific configurations requested by the Licensee that fall outside the scope of standard maintenance.  
+* **Business Days:** Days from Monday through Friday, excluding official holidays and mandatory rest days within the territory of the USA.
+
+## **2. Grant and Scope of License**
+
+The Licensor grants the Licensee a license to use the Application on a **non-exclusive, non-transferable, revocable, and limited commercial basis**. This license permits an unlimited number of users per installation or registered account. However, the use of the Application, accounts, or access by affiliated companies, subsidiaries, or third parties unrelated to the legal entity of the Licensee is expressly prohibited without prior written consent from the Licensor.
+
+## **3. Service Plans and Fees**
+
+| Feature / Plan | Free Plan | Premium Plan |
+| :---- | :---- | :---- |
+| **Monthly Price** | 0 USD | 9 USD |
+| **Contact Channels** | Email only | Video call or email |
+| **Support Priority** | General queue support | Absolute priority case handling |
+| **Work Sessions** | Not included | 1 free session per month (max. 15 minutes) |
+
+## **4. Service Level Agreement (SLA) and Technical Support**
+
+* **Contact Method:** For both plans, report or ticket submission must be performed by email.  
+* **Response Time - Premium Plan:** The Licensor commits to respond within 24 hours counted during Business Days. "Response" is defined as the technical acknowledgment of receipt, initial problem diagnosis, and severity assignment, but not necessarily the immediate final resolution of the incident.  
+* **Response Time - Free Plan:** The response time will be up to 7 calendar days, subject to order of arrival in the general queue.  
+* **SLA Compensation:** If the Licensor fails to meet the Premium Plan response time more than three (3) consecutive times in the same billed month, the Licensee will receive a credit equal to 10% of the applicable monthly fee on their next invoice, which shall be the sole available compensation remedy.  
+* **Support Exclusion:** Included support strictly covers Platform Maintenance. External requests or design/business logic modifications will be quoted separately as Implementation. Additional work sessions will incur a fixed fee of 6 USD for each 15-minute block.
+
+## **5. Confidentiality and Data Protection**
+
+Both parties commit to maintaining strict confidentiality regarding commercial, technical, and operational information shared during the term of the commercial relationship.
+
+Regarding personal data protection and privacy regulations (including local regulations and GDPR principles if applicable), the parties expressly agree that personal data processing will occur exclusively within the servers and technology infrastructure designated to host the Application. The Licensor commits not to transfer, extract, or process personal data outside that secure environment, acting strictly as the data processor for the data provided by the Licensee.
+
+## **6. Ownership of Data and Customizations**
+
+* **Licensee Data:** All information, records, and data entered by the Licensee into the Application are and will remain the Licensee's exclusive property. At the termination of this Agreement, the Licensee will have thirty (30) calendar days to export their data in a compatible standard format (e.g. CSV or JSON).  
+* **Ownership of Customizations:** Any code, enhancement, or customization resulting from an Implementation service paid by the Licensee will be considered a derivative work and the intellectual property will be retained entirely by the Licensor, with the Licensee granted only a non-exclusive right of use under the same terms of this Agreement.
+
+## **7. Limitation of Liability and Warranty Disclaimers**
+
+The Application is provided on an "as is" and "as available" basis. The Licensor expressly disclaims any implied warranty of merchantability or fitness for a particular purpose.
+
+Under no circumstances will the Licensor be liable for indirect, incidental, punitive damages, lost profits, or loss of business data of the Licensee. The Licensor's maximum cumulative monetary liability for any claim arising from this Agreement is strictly capped at the amount actually paid by the Licensee during the six (6) months preceding the event giving rise to the claim.
+
+## **8. Term, Termination, and Unilateral Modifications**
+
+* **Automatic Cancellation and Non-Payment:** Service will be automatically canceled at the end of the billing cycle if the Licensee does not pay the corresponding fee.  
+* **Termination for Breach:** Either party may terminate the Agreement if the other party commits a material breach of its obligations, allowing a period of fifteen (15) Business Days to cure it prior to formal termination.  
+* **Terms and Fees Changes:** The Licensor reserves the right to unilaterally modify the terms of this Agreement or plan prices with thirty (30) days prior notice by email. If the Licensee does not accept the new terms, they retain the right to terminate the service immediately without penalty before the changes take effect.  
+* **Limited Refund Policy:** As a general rule, payments are non-refundable. However, an exception is granted for a prorated refund if the service experiences absolute and continuous unavailability attributable to the Licensor for more than seven (7) consecutive calendar days, or in the case of justified termination due to a material uncured breach by the Licensor.
+
+## **9. Governing Law and Jurisdiction**
+
+This Agreement is governed by the laws in force in the **USA**. Any dispute, disagreement, or claim will be submitted exclusively to the competent courts of the city of **DALLAS, TX**, with the parties waiving any other jurisdiction that may apply.
+
+## **Contact Information**
+
+Sanaltec Corporation
+
+3723 Greenville Avenue STE 41215 Dallas, TX, 75206 US
+
+contacto@enerlinq.com

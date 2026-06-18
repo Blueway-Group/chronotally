@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Enerlinq.
+// Licensed under the LGPL-3.0 License. See LICENSE file for details.
+
 // Export the base API instance as both default and named export
 import api from './api'
 export { api }
