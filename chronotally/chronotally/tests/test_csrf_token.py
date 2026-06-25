@@ -1,4 +1,4 @@
-# Copyright (c) 2025, Enerlinq and Contributors
+# Copyright (c) 2025, Blueway Consulting LLC and Contributors
 # See license.txt
 
 from unittest.mock import MagicMock, patch
