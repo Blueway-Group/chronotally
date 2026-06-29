@@ -1,4 +1,4 @@
-# Copyright (c) 2025, Enerlinq and Contributors
+# Copyright (c) 2025, Blueway Consulting LLC and Contributors
 # See license.txt
 
 from datetime import date, datetime, time, timezone
