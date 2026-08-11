@@ -5,7 +5,7 @@ app_name = "chronotally"
 app_title = "ChronoTally"
 app_publisher = "ChronoTally"
 app_description = "time tracking and timesheet management."
-app_email = "contacto@enerlinq.com"
+app_email = "info@bluewaypro.com"
 app_license = "lgpl-3.0"
 
 # Apps
@@ -17,10 +17,9 @@ required_apps = ["erpnext"]
 # add_to_apps_screen = [
 # 	{
 # 		"name": "chronotally",
-# 		"logo": "/assets/chronotally/logo.png",
-# 		"title": "enerlinq-timesheets",
-# 		"route": "/chronotally",
-# 		"has_permission": "chronotally.api.permission.has_app_permission"
+# 		"logo": "/public/frontend/logo.png",
+# 		"title": "Chronotally",
+# 		"route": "/chronotally"
 # 	}
 # ]
 
