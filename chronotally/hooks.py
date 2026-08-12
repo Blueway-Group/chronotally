@@ -21,7 +21,7 @@ add_to_apps_screen = [
 		"name": "chronotally",
 		"logo": "/assets/chronotally/chronotally-logo-square.png",
 		"title": "ChronoTally",
-		"route": "/chronotally"
+		"route": "/chronotally",
 	}
 ]
 
