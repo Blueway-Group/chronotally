@@ -19,9 +19,9 @@ required_apps = ["erpnext"]
 add_to_apps_screen = [
 	{
 		"name": "chronotally",
-		"logo": "/assets/chronotally/chronotally-logo-square.png",
+		"logo": "/assets/chronotally/chronotally-logo-notext.png",
 		"title": "ChronoTally",
-		"route": "/chronotally",
+		"route": "/desk/chronotally",
 	}
 ]
 
