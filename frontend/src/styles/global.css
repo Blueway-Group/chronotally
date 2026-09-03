@@ -16,14 +16,6 @@
   --color-blue-950: #172554;
 }
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these borders.
-*/
 @layer base {
   *,
   ::after,
@@ -45,46 +37,154 @@
 /* FullCalendar Custom CSS Variables Integration */
 @layer components {
   :root {
-    /* FullCalendar CSS Variables with DaisyUI Theme Integration */
-    --fc-border-color: var(--color-base-300, oklch(var(--b3)));
-    --fc-button-text-color: var(--color-base-content, oklch(var(--bc)));
+    --ct-cal-surface: var(--color-base-200, oklch(var(--b2)));
+    --ct-cal-border: color-mix(in oklch, var(--color-base-content, oklch(var(--bc))) 40%, transparent);
+    --ct-cal-text: var(--color-base-content, oklch(var(--bc)));
+    --ct-cal-today: var(--color-primary, oklch(var(--p)));
+    --ct-cal-today-text: var(--color-primary-content, oklch(var(--pc)));
+
+    --fc-border-color: var(--ct-cal-border);
+    --fc-button-text-color: var(--ct-cal-text);
     --fc-button-bg-color: transparent;
-    --fc-button-border-color: var(--color-base-300, oklch(var(--b3)));
+    --fc-button-border-color: var(--ct-cal-border);
     --fc-button-hover-bg-color: var(--color-primary, oklch(var(--p)));
-    --fc-button-hover-text-color: var(--color-primary-content, oklch(var(--pc)));
+    --fc-button-hover-text-color: var(--ct-cal-today-text);
     --fc-button-active-bg-color: var(--color-primary, oklch(var(--p)));
-    --fc-button-active-text-color: var(--color-primary-content, oklch(var(--pc)));
+    --fc-button-active-text-color: var(--ct-cal-today-text);
     --fc-event-bg-color: var(--color-secondary, oklch(var(--s)));
     --fc-event-border-color: var(--color-secondary, oklch(var(--s)));
     --fc-event-text-color: var(--color-secondary-content, oklch(var(--sc)));
-    --fc-neutral-bg-color: var(--color-base-100, oklch(var(--b1)));
-    --fc-neutral-text-color: var(--color-base-content, oklch(var(--bc)));
-    --fc-page-bg-color: var(--color-base-100, oklch(var(--b1)));
-    --fc-today-bg-color: color-mix(in oklch, var(--color-primary, oklch(var(--p))) 10%, transparent);
+    --fc-neutral-bg-color: var(--ct-cal-surface);
+    --fc-neutral-text-color: var(--ct-cal-text);
+    --fc-page-bg-color: var(--ct-cal-surface);
+    --fc-today-bg-color: var(--ct-cal-today);
   }
 
-  /* FullCalendar Base Styling */
+  .ct-calendar-card {
+    background-color: var(--ct-cal-surface);
+    color: var(--ct-cal-text);
+  }
+
+  .ct-calendar-card .card-title,
+  .ct-calendar-card .btn {
+    color: var(--ct-cal-text);
+  }
+
+  .fc,
+  .fc .fc-view-harness,
+  .fc .fc-view,
+  .fc .fc-scroller,
+  .fc .fc-scroller-harness,
+  .fc .fc-scrollgrid,
+  .fc .fc-scrollgrid-section > *,
+  .fc .fc-daygrid-body,
+  .fc .fc-daygrid-day,
+  .fc .fc-timegrid-body,
+  .fc .fc-timegrid-slot-label,
+  .fc .fc-timegrid-axis,
+  .fc .fc-timegrid-axis-frame,
+  .fc .fc-timegrid-axis-frame-liquid,
+  .fc .fc-timegrid-divider,
+  .fc .fc-scrollgrid-shrink-frame,
+  .fc .fc-col-header,
+  .fc .fc-col-header-cell,
+  .fc .fc-popover,
+  .fc .fc-popover-header,
+  .fc .fc-header-toolbar,
+  .fc th,
+  .fc td {
+    background-color: var(--ct-cal-surface) !important;
+  }
+
+  .fc .fc-timegrid-cols td.fc-timegrid-col,
+  .fc .fc-timegrid-slots,
+  .fc .fc-timegrid-slots td.fc-timegrid-slot-lane {
+    background-color: transparent !important;
+  }
+
+  .fc .fc-timegrid-cols td.fc-timegrid-col.fc-day-today {
+    background-color: var(--ct-cal-today) !important;
+  }
+
+  .fc .fc-timegrid-cols td.fc-timegrid-col {
+    border-left: 1px solid var(--ct-cal-border) !important;
+    border-right: 1px solid var(--ct-cal-border) !important;
+  }
+
+  .fc,
+  .fc .fc-scrollgrid,
+  .fc .fc-scrollgrid-section > *,
+  .fc .fc-daygrid-day,
+  .fc .fc-timegrid-slot,
+  .fc .fc-timegrid-slot-minor,
+  .fc .fc-timegrid-slot-label,
+  .fc .fc-timegrid-col,
+  .fc .fc-timegrid-axis,
+  .fc .fc-timegrid-divider,
+  .fc .fc-col-header,
+  .fc .fc-col-header-cell,
+  .fc .fc-popover,
+  .fc .fc-popover-header,
+  .fc th,
+  .fc td {
+    border-color: var(--ct-cal-border) !important;
+  }
+
+  .fc,
+  .fc a,
+  .fc .fc-toolbar-title,
+  .fc .fc-button,
+  .fc .fc-col-header-cell,
+  .fc .fc-col-header-cell-cushion,
+  .fc .fc-daygrid-day-number,
+  .fc .fc-daygrid-week-number,
+  .fc .fc-timegrid-axis,
+  .fc .fc-timegrid-axis-cushion,
+  .fc .fc-timegrid-slot-label,
+  .fc .fc-timegrid-slot-label-cushion,
+  .fc .fc-popover-header,
+  .fc .fc-more-link {
+    color: var(--ct-cal-text) !important;
+  }
+
+  .fc .fc-daygrid-day.fc-day-today,
+  .fc .fc-timegrid-col.fc-day-today,
+  .fc .fc-col-header-cell.fc-day-today,
+  .fc .fc-scrollgrid-sync-table .fc-day-today,
+  .fc th.fc-day-today,
+  .fc td.fc-day-today {
+    background-color: var(--ct-cal-today) !important;
+  }
+
+  .fc .fc-day-today .fc-daygrid-day-number,
+  .fc .fc-day-today a.fc-daygrid-day-number {
+    background-color: transparent !important;
+    color: var(--ct-cal-today-text) !important;
+    font-weight: 700;
+  }
+
+  .fc .fc-col-header-cell.fc-day-today,
+  .fc .fc-col-header-cell.fc-day-today .fc-col-header-cell-cushion,
+  .fc .fc-col-header-cell.fc-day-today a {
+    color: var(--ct-cal-today-text) !important;
+  }
+
   .fc {
-    background-color: var(--color-base-100, oklch(var(--b1))) !important;
     border-radius: var(--radius-box, 0.5rem);
-    box-shadow: var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1));
-    border: var(--border, 1px) solid var(--color-base-300, oklch(var(--b3))) !important;
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
+    border: var(--border, 1px) solid var(--ct-cal-border) !important;
     font-family: var(--font-sans);
-    color: var(--color-base-content, oklch(var(--bc))) !important;
   }
 
-  /* Header and Toolbar */
   .fc .fc-header-toolbar {
-    background-color: var(--color-base-200, oklch(var(--b2))) !important;
     border-radius: var(--radius-box, 0.5rem) var(--radius-box, 0.5rem) 0 0;
     padding: 0.75rem 1rem;
-    border-bottom: var(--border, 1px) solid var(--color-base-300, oklch(var(--b3))) !important;
+    border-bottom: var(--border, 1px) solid var(--ct-cal-border) !important;
   }
 
   .fc .fc-toolbar-title {
     font-size: var(--text-lg, 1.125rem);
     font-weight: var(--font-weight-semibold, 600);
-    color: var(--color-base-content, oklch(var(--bc))) !important;
   }
 
   /* Buttons */
@@ -103,7 +203,6 @@
     border-radius: var(--radius-field, 0.25rem);
     border: var(--border, 1px) solid var(--fc-button-border-color);
     background-color: var(--fc-button-bg-color);
-    color: var(--fc-button-text-color);
     font-size: 0.875rem;
     font-weight: 500;
     text-transform: none;
@@ -113,15 +212,15 @@
   }
 
   .fc .fc-button:hover:not(:disabled) {
-    background-color: var(--fc-button-hover-bg-color);
-    color: var(--fc-button-hover-text-color);
-    border-color: var(--color-primary, oklch(var(--p)));
+    background-color: var(--fc-button-hover-bg-color) !important;
+    border-color: var(--color-primary, oklch(var(--p))) !important;
+    color: var(--fc-button-hover-text-color) !important;
   }
 
   .fc .fc-button:not(:disabled).fc-button-active {
-    background-color: var(--fc-button-active-bg-color);
-    color: var(--fc-button-active-text-color);
-    border-color: var(--color-primary, oklch(var(--p)));
+    background-color: var(--fc-button-active-bg-color) !important;
+    border-color: var(--color-primary, oklch(var(--p))) !important;
+    color: var(--fc-button-active-text-color) !important;
   }
 
   .fc .fc-button:disabled {
@@ -129,16 +228,7 @@
     cursor: not-allowed;
   }
 
-  /* Calendar Grid */
-  .fc .fc-view-harness {
-    background-color: var(--fc-page-bg-color) !important;
-  }
-
-  .fc .fc-daygrid-day {
-    border-color: var(--fc-border-color) !important;
-    background-color: var(--color-base-100, oklch(var(--b1))) !important;
-  }
-
+  /* Day cells */
   .fc .fc-daygrid-day-frame {
     min-height: 100px;
   }
@@ -157,65 +247,37 @@
     transition: background-color 200ms;
   }
 
-  .fc .fc-daygrid-day-number:hover {
-    background-color: var(--color-base-200, oklch(var(--b2)));
+  /* Theme-relative tint: a dark wash in the light theme, a light one in dark. */
+  .fc .fc-day:not(.fc-day-today) .fc-daygrid-day-number:hover {
+    background-color: color-mix(in oklch, var(--ct-cal-text) 12%, transparent);
   }
 
-  /* Today styling */
-  .fc .fc-day-today {
-    background-color: color-mix(in oklch, var(--color-primary, oklch(var(--p))) 25%, var(--color-base-200, oklch(var(--b2)))) !important;
-    border-color: color-mix(in oklch, var(--color-primary, oklch(var(--p))) 50%, transparent) !important;
-  }
-
-  .fc .fc-day-today .fc-daygrid-day-number {
-    background-color: var(--color-primary, oklch(var(--p)));
-    color: var(--color-primary-content, oklch(var(--pc)));
-    font-weight: 700;
-  }
-
-  /* Weekend styling */
-  .fc .fc-day-sat,
-  .fc .fc-day-sun {
-    background-color: color-mix(in oklch, var(--color-base-300, oklch(var(--b3))) 80%, var(--color-base-100, oklch(var(--b1)))) !important;
-  }
-
-  /* Other month days */
-  .fc .fc-day-other {
-    background-color: color-mix(in oklch, var(--color-base-300, oklch(var(--b3))) 60%, var(--color-base-100, oklch(var(--b1)))) !important;
-    opacity: 0.8;
-  }
-
+  /* Other-month days share the surface; the only cue is a dimmer day number. */
   .fc .fc-day-other .fc-daygrid-day-number {
-    color: color-mix(in oklch, var(--color-base-content, oklch(var(--bc))) 60%, transparent) !important;
-  }
-
-  /* Column Headers (Sun, Mon, Tue, etc.) */
-  .fc .fc-col-header {
-    background-color: var(--color-base-200, oklch(var(--b2))) !important;
-    border-color: var(--fc-border-color) !important;
+    opacity: 0.55;
   }
 
   .fc .fc-col-header-cell {
-    color: var(--color-base-content, oklch(var(--bc))) !important;
     font-weight: 600;
     padding: 0.5rem;
-    background-color: var(--color-base-200, oklch(var(--b2))) !important;
   }
 
   .fc .fc-col-header-cell-cushion {
-    color: var(--color-base-content, oklch(var(--bc))) !important;
     font-weight: 600;
     padding: 0.5rem;
   }
 
-  /* Ensure header sections use theme colors */
-  .fc .fc-scrollgrid-section-header {
-    background-color: var(--color-base-200, oklch(var(--b2))) !important;
+  /* Time grid */
+  .fc .fc-timegrid-slot {
+    height: 3rem;
   }
 
-  .fc .fc-scrollgrid-section-header th {
-    background-color: var(--color-base-200, oklch(var(--b2))) !important;
-    border-color: var(--fc-border-color) !important;
+  .fc .fc-timegrid-axis {
+    font-size: 0.75rem;
+  }
+
+  .fc .fc-timegrid-slot-label {
+    font-weight: 500;
   }
 
   /* Events */
@@ -224,14 +286,14 @@
     color: var(--fc-event-text-color);
     border: var(--border, 1px) solid var(--fc-event-border-color);
     border-radius: var(--radius-field, 0.25rem);
-    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgb(0 0 0 / 0.05));
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
     font-size: 0.75rem;
     font-weight: 500;
   }
 
   .fc-event:hover {
-    background-color: color-mix(in oklch, var(--fc-event-bg-color) 90%, black);
     box-shadow: var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1));
+    filter: brightness(1.1);
   }
 
   .fc-event .fc-event-title {
@@ -243,93 +305,17 @@
     opacity: 0.9;
   }
 
-  /* Status-based event colors using DaisyUI semantic colors */
-  .fc-event.status-draft {
-    background-color: var(--color-neutral, oklch(var(--n)));
-    color: var(--color-neutral-content, oklch(var(--nc)));
-    border-color: var(--color-neutral, oklch(var(--n)));
-  }
-
-  .fc-event.status-submitted {
-    background-color: var(--color-warning, oklch(var(--wa)));
-    color: var(--color-warning-content, oklch(var(--wac)));
-    border-color: var(--color-warning, oklch(var(--wa)));
-  }
-
-  .fc-event.status-billed {
-    background-color: var(--color-success, oklch(var(--su)));
-    color: var(--color-success-content, oklch(var(--suc)));
-    border-color: var(--color-success, oklch(var(--su)));
-  }
-
-  .fc-event.status-cancelled {
-    background-color: var(--color-error, oklch(var(--er)));
-    color: var(--color-error-content, oklch(var(--erc)));
-    border-color: var(--color-error, oklch(var(--er)));
-  }
-
-  .fc-event.overtime-event {
-    background-color: var(--color-warning, oklch(var(--wa)));
-    color: var(--color-warning-content, oklch(var(--wac)));
-    border: 2px dashed var(--color-warning, oklch(var(--wa)));
-  }
-
-  .fc-event.timesheet-event {
-    background-color: var(--color-secondary, oklch(var(--s)));
-    color: var(--color-secondary-content, oklch(var(--sc)));
-    border-color: var(--color-secondary, oklch(var(--s)));
-  }
-
-  /* Time Grid (Week/Day views) */
-  .fc .fc-timegrid-slot {
-    border-color: var(--fc-border-color);
-    height: 3rem;
-    background-color: var(--color-base-100, oklch(var(--b1)));
-  }
-
-  .fc .fc-timegrid-slot-lane {
-    background-color: var(--color-base-100, oklch(var(--b1)));
-  }
-
-  .fc .fc-timegrid-slot-minor {
-    border-color: var(--color-base-200, oklch(var(--b2)));
-    background-color: var(--color-base-100, oklch(var(--b1)));
-  }
-
-  .fc .fc-timegrid-axis {
-    color: color-mix(in oklch, var(--color-base-content, oklch(var(--bc))) 70%, transparent);
-    font-size: 0.75rem;
-    background-color: var(--color-base-200, oklch(var(--b2)));
-  }
-
-  .fc .fc-timegrid-axis-frame,
-  .fc .fc-timegrid-axis-frame-liquid {
-    background-color: var(--color-base-200, oklch(var(--b2)));
-  }
-
-  .fc .fc-scrollgrid-shrink-frame {
-    background-color: var(--color-base-200, oklch(var(--b2)));
-  }
-
-  .fc .fc-timegrid-slot-label {
-    color: color-mix(in oklch, var(--color-base-content, oklch(var(--bc))) 70%, transparent);
-    font-weight: 500;
-  }
-
-  /* Popovers and tooltips */
+  /* Popover */
   .fc .fc-popover {
-    background-color: var(--color-base-100, oklch(var(--b1)));
-    border: var(--border, 1px) solid var(--color-base-300, oklch(var(--b3)));
+    border: var(--border, 1px) solid var(--ct-cal-border);
     border-radius: var(--radius-box, 0.5rem);
     box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
   }
 
   .fc .fc-popover-header {
-    background-color: var(--color-base-200, oklch(var(--b2)));
-    border-bottom: var(--border, 1px) solid var(--color-base-300, oklch(var(--b3)));
+    border-bottom: var(--border, 1px) solid var(--ct-cal-border);
     padding: 0.5rem 0.75rem;
     font-weight: 600;
-    color: var(--color-base-content, oklch(var(--bc)));
   }
 
   .fc .fc-popover-body {
@@ -338,57 +324,17 @@
 
   /* More links */
   .fc .fc-more-link {
-    color: var(--color-primary, oklch(var(--p)));
     text-decoration: underline;
     font-size: 0.75rem;
     font-weight: 500;
   }
 
-  .fc .fc-more-link:hover {
-    color: color-mix(in oklch, var(--color-primary, oklch(var(--p))) 80%, black);
-  }
-
-  /* Force override any remaining FullCalendar defaults */
   .fc * {
     box-sizing: border-box;
   }
 
-  .fc th,
-  .fc td {
-    border-color: var(--fc-border-color) !important;
-    background-color: inherit !important;
-  }
-
-  .fc .fc-scrollgrid-sync-table th,
-  .fc .fc-scrollgrid-sync-table td {
-    background-color: inherit !important;
-  }
-
-  /* Ensure all calendar cells use theme colors */
-  .fc .fc-scrollgrid-sync-table .fc-daygrid-day {
-    background-color: var(--color-base-100, oklch(var(--b1))) !important;
-  }
-
-  .fc .fc-scrollgrid-sync-table .fc-day-today {
-    background-color: color-mix(in oklch, var(--color-primary, oklch(var(--p))) 25%, var(--color-base-200, oklch(var(--b2)))) !important;
-  }
-
-  .fc .fc-scrollgrid-sync-table .fc-day-sat,
-  .fc .fc-scrollgrid-sync-table .fc-day-sun {
-    background-color: color-mix(in oklch, var(--color-base-300, oklch(var(--b3))) 80%, var(--color-base-100, oklch(var(--b1)))) !important;
-  }
-
-  .fc .fc-scrollgrid-sync-table .fc-day-other {
-    background-color: color-mix(in oklch, var(--color-base-300, oklch(var(--b3))) 60%, var(--color-base-100, oklch(var(--b1)))) !important;
-  }
-
   .fc a {
-    color: var(--color-base-content, oklch(var(--bc))) !important;
     text-decoration: none;
-  }
-
-  .fc a:hover {
-    color: var(--color-primary, oklch(var(--p))) !important;
   }
 
   /* Responsive design */
@@ -412,14 +358,5 @@
     .fc .fc-daygrid-day-frame {
       min-height: 80px;
     }
-  }
-
-  /* Dark mode support - DaisyUI handles this automatically */
-  .fc {
-    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
-  }
-
-  .fc-event {
-    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
   }
 }
