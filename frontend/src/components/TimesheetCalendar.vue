@@ -465,10 +465,6 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* Calendar grid/border/background styling lives in src/styles/global.css
-   (the `@layer components` FullCalendar block). Rules cannot be applied from
-   here: this <style> block is not `scoped`, so `:deep()` selectors are left
-   uncompiled and dropped by the browser. */
 
 /* Tooltip improvements */
 .timesheet-tooltip {
