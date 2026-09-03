@@ -16,14 +16,6 @@
   --color-blue-950: #172554;
 }
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these borders.
-*/
 @layer base {
   *,
   ::after,
@@ -45,24 +37,12 @@
 /* FullCalendar Custom CSS Variables Integration */
 @layer components {
   :root {
-    /* ChronoTally calendar palette — the whole component is built from these.
-       Everything except today is --ct-cal-surface; today is --ct-cal-today.
-       They map onto daisyUI theme tokens so the calendar matches the stat cards
-       on the same page (`bg-base-200`) and follows light/dark automatically. */
     --ct-cal-surface: var(--color-base-200, oklch(var(--b2)));
-    /* Derived from the text colour, not base-300: in the dark theme base-300 is
-       *darker* than the base-200 surface, so grid lines built from it vanish.
-       base-content is near-white in dark and near-black in light, so a wash of
-       it always contrasts with the surface. */
     --ct-cal-border: color-mix(in oklch, var(--color-base-content, oklch(var(--bc))) 40%, transparent);
     --ct-cal-text: var(--color-base-content, oklch(var(--bc)));
     --ct-cal-today: var(--color-primary, oklch(var(--p)));
-    /* For text drawn on top of the solid --ct-cal-today fill, where --ct-cal-text
-       would be the wrong contrast (it is dark in the light theme). */
     --ct-cal-today-text: var(--color-primary-content, oklch(var(--pc)));
 
-    /* FullCalendar's own variables, pointed at the palette above so its
-       runtime-injected stylesheet agrees with ours. */
     --fc-border-color: var(--ct-cal-border);
     --fc-button-text-color: var(--ct-cal-text);
     --fc-button-bg-color: transparent;
@@ -80,9 +60,6 @@
     --fc-today-bg-color: var(--ct-cal-today);
   }
 
-  /* The card that wraps the calendar on the Timesheets page. It shares the
-     calendar's own surface so the padded `card-body` does not frame the grid in
-     a different colour — the pair reads as one card, like the stats above it. */
   .ct-calendar-card {
     background-color: var(--ct-cal-surface);
     color: var(--ct-cal-text);
@@ -93,21 +70,6 @@
     color: var(--ct-cal-text);
   }
 
-  /* ------------------------------------------------------------------
-     1. One ground for the entire component.
-
-     Every structural element is painted explicitly. This replaces the old
-     `.fc th, .fc td { background-color: inherit !important }`, which resolved
-     to the <tr>'s transparent background and left every timegrid column and
-     hour lane unpainted.
-
-     Deliberately NOT listed: .fc-daygrid-day-frame, .fc-timegrid-cols,
-     .fc-timegrid-col, .fc-timegrid-col-frame, .fc-timegrid-col-bg and the hour
-     lanes. Those sit inside the day cell or in one of the two layers stacked
-     over the timegrid body; painting them opaque covers today's column fill and
-     the column dividers. They stay transparent and show the ground painted
-     underneath them — .fc-timegrid-body carries it for the whole hour grid.
-     ------------------------------------------------------------------ */
   .fc,
   .fc .fc-view-harness,
   .fc .fc-view,
@@ -134,42 +96,21 @@
     background-color: var(--ct-cal-surface) !important;
   }
 
-  /* The timegrid body stacks two layers over its own background: the day columns
-     (.fc-timegrid-cols, position:absolute with z-index auto) and the hour lanes
-     (.fc-timegrid-slots, z-index 1). The lanes therefore paint ABOVE the
-     columns, so anything opaque there hides today's column fill and the column
-     dividers — which is exactly what the `.fc td` blanket above does to both
-     layers. Keep them transparent; .fc-timegrid-body is the ground for this
-     whole area, and the lanes still draw their hour lines on top of it all. */
   .fc .fc-timegrid-cols td.fc-timegrid-col,
   .fc .fc-timegrid-slots,
   .fc .fc-timegrid-slots td.fc-timegrid-slot-lane {
     background-color: transparent !important;
   }
 
-  /* …except today, which is a solid blue column. */
   .fc .fc-timegrid-cols td.fc-timegrid-col.fc-day-today {
     background-color: var(--ct-cal-today) !important;
   }
 
-  /* The day dividers in week/day view. FullCalendar draws these only through its
-     own `.fc-theme-standard td { border: 1px solid }`, so declare the whole
-     border here (width and style, not just the colour) rather than depending on
-     that rule surviving. Today's column carries .fc-day-today on this same <td>,
-     so it is divided like the rest. Both these borders and today's fill depend
-     on the hour-lane layer above staying transparent — see the note above. */
   .fc .fc-timegrid-cols td.fc-timegrid-col {
     border-left: 1px solid var(--ct-cal-border) !important;
     border-right: 1px solid var(--ct-cal-border) !important;
   }
 
-  /* ------------------------------------------------------------------
-     2. Borders — --ct-cal-border everywhere.
-
-     Events are excluded on purpose: their border colours are inline styles
-     set per status in TimesheetCalendar.vue. The now-indicator is excluded
-     because it is drawn with border-color and must stay red.
-     ------------------------------------------------------------------ */
   .fc,
   .fc .fc-scrollgrid,
   .fc .fc-scrollgrid-section > *,
@@ -189,11 +130,6 @@
     border-color: var(--ct-cal-border) !important;
   }
 
-  /* ------------------------------------------------------------------
-     3. Text — the theme's base content colour everywhere. Event labels are not
-     affected: their colour is an inline style on .fc-event-main, which beats
-     what these rules set on the ancestor.
-     ------------------------------------------------------------------ */
   .fc,
   .fc a,
   .fc .fc-toolbar-title,
@@ -211,12 +147,6 @@
     color: var(--ct-cal-text) !important;
   }
 
-  /* ------------------------------------------------------------------
-     4. Today — solid blue, painted over the ground.
-
-     Each selector chains .fc-day-today onto its element so it out-specifies
-     the ground rule above (max specificity there is 0,2,0).
-     ------------------------------------------------------------------ */
   .fc .fc-daygrid-day.fc-day-today,
   .fc .fc-timegrid-col.fc-day-today,
   .fc .fc-col-header-cell.fc-day-today,
@@ -226,10 +156,6 @@
     background-color: var(--ct-cal-today) !important;
   }
 
-  /* Anything drawn on the solid today fill takes --ct-cal-today-text, not the
-     component's normal text colour (which is dark in the light theme). The
-     day-number chip is transparent rather than a pill — a solid primary pill on
-     a solid primary cell would be invisible. */
   .fc .fc-day-today .fc-daygrid-day-number,
   .fc .fc-day-today a.fc-daygrid-day-number {
     background-color: transparent !important;
@@ -243,9 +169,6 @@
     color: var(--ct-cal-today-text) !important;
   }
 
-  /* ------------------------------------------------------------------
-     5. Structure, spacing and the remaining component chrome
-     ------------------------------------------------------------------ */
   .fc {
     border-radius: var(--radius-box, 0.5rem);
     box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
@@ -288,8 +211,6 @@
     user-select: none;
   }
 
-  /* Hovered and active buttons are filled with the primary colour, so their
-     label follows the primary content colour rather than --ct-cal-text. */
   .fc .fc-button:hover:not(:disabled) {
     background-color: var(--fc-button-hover-bg-color) !important;
     border-color: var(--color-primary, oklch(var(--p))) !important;
