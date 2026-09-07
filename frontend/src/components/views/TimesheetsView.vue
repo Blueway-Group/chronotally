@@ -823,7 +823,7 @@ onUnmounted(() => {
     />
 
     <!-- Calendar View -->
-    <div v-else class="card bg-base-100 shadow">
+    <div v-else class="card ct-calendar-card shadow">
       <div class="card-body">
         <div class="flex items-center justify-between mb-4">
           <h2 class="card-title">Calendar View</h2>
@@ -836,7 +836,7 @@ onUnmounted(() => {
                 <span v-else class="loading loading-spinner loading-sm"></span>
               </button>
             </div>
-            <div v-if="lastRefreshed" class="text-xs text-base-content/60">
+            <div v-if="lastRefreshed" class="text-xs opacity-60">
               {{ formatTimeAgo(lastRefreshed) }}
             </div>
           </div>
