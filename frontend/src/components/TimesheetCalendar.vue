@@ -338,22 +338,24 @@ function getStatusBadgeClass(status) {
   return classes[status] || 'badge-ghost'
 }
 
-const timesheetSettings = async() => {
+const timesheetSettings = async () => {
   try {
     let defaultPeriod = ''
     const response = await getTimesheetSettings()
-    if(response.default_period === 'Work Week'){
+
+    if(response.default_period === 'Work Week') {
       defaultPeriod = 'timeGridWeek'
       console.log('Default period set to Work Week')
-    } else {
-      defaultPeriod = 'dayGridMonth'
-      console.log('Default period set to Month')
-    }
-
+    } 
+    
+    if(response.default_period === 'Work Day') {
+      defaultPeriod = 'timeGridDay'
+      console.log('Default period set to Work Day')
+    } 
+      
     return defaultPeriod
   } catch (error) {
     console.error('Error fetching timesheet settings:', error)
-    return 'dayGridMonth'
   }
 }
 
@@ -371,7 +373,7 @@ watch(calendarEvents, (newEvents) => {
 watch(() => props.viewMode, (newViewMode) => {
   if (newViewMode === 'calendar') {
     // Default to dayGridMonth when switching to calendar
-    calendarOptions.value.initialView = 'dayGridMonth'
+    calendarOptions.value.initialView = selectedView.value
   }
 })
 
