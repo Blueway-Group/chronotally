@@ -11,17 +11,17 @@
   {
    "fieldname": "default_period",
    "fieldtype": "Select",
-   "label": "Default Period",
-   "options": "Work Week"
+   "label": "Default Calendar View",
+   "options": "Work Week\nWork Month\nWork Day"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-10-28 22:59:52.656835",
+ "modified": "2026-09-18 15:26:31.918138",
  "modified_by": "Administrator",
- "module": "Chronotally",
+ "module": "chronotally",
  "name": "ChronoTally Settings",
  "owner": "Administrator",
  "permissions": [
