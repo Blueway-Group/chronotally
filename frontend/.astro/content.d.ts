@@ -85,10 +85,6 @@ declare module 'astro:content' {
 		entry: DataEntryMap[C][string],
 	): Promise<RenderResult>;
 
-	export function render<C extends keyof LiveContentConfig['collections']>(
-		entry: import('astro').LiveDataEntry<LiveLoaderDataType<C>>,
-	): Promise<RenderResult>;
-
 	export function reference<
 		C extends
 			| keyof DataEntryMap
@@ -138,7 +134,6 @@ declare module 'astro:content' {
 	type ExtractEntryFilterType<T> = ExtractLoaderTypes<T>['entryFilter'];
 	type ExtractCollectionFilterType<T> = ExtractLoaderTypes<T>['collectionFilter'];
 	type ExtractErrorType<T> = ExtractLoaderTypes<T>['error'];
-	type ExtractDataType<T> = ExtractLoaderTypes<T>['data'];
 
 	type LiveLoaderDataType<C extends keyof LiveContentConfig['collections']> =
 		LiveContentConfig['collections'][C]['schema'] extends undefined
