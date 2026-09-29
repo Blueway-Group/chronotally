@@ -1,0 +1,20 @@
+---
+// Copyright (c) 2026 Blueway Consulting LLC.
+// Licensed under the LGPL-3.0 License. See LICENSE file for details.
+
+// BackToErpButton component - redirects the user back to the ERP desk
+const erpUrl = '/desk/chronotally'
+---
+
+<li>
+  <a
+    id="back-to-erp-button"
+    href={erpUrl}
+    class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 w-full text-left"
+  >
+    <span class="material-symbols-rounded text-xl">
+      arrow_back
+    </span>
+    <span class="font-medium">Back to ERP</span>
+  </a>
+</li>

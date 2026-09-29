@@ -2,7 +2,7 @@
   "name": "frontend",
   "type": "module",
   "version": "0.0.1",
-  "license": "",
+  "license": "LGPL-3.0-only",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && yarn run copy-html-files",
@@ -11,22 +11,22 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/vue": "7.0.2",
-    "astro": "7.3.1",
+    "@astrojs/vue": "7.0.3",
+    "astro": "7.3.5",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
-    "@fullcalendar/core": "6.1.20",
-    "@fullcalendar/daygrid": "6.1.20",
-    "@fullcalendar/interaction": "6.1.20",
-    "@fullcalendar/timegrid": "6.1.20",
-    "@fullcalendar/vue3": "6.1.20",
-    "@tailwindcss/vite": "4.2.4",
+    "@fullcalendar/core": "6.1.21",
+    "@fullcalendar/daygrid": "6.1.21",
+    "@fullcalendar/interaction": "6.1.21",
+    "@fullcalendar/timegrid": "6.1.21",
+    "@fullcalendar/vue3": "6.1.21",
+    "@tailwindcss/vite": "4.3.3",
     "astro-mcp": "0.4.2",
-    "axios": "1.15.1",
-    "daisyui": "5.5.19",
-    "material-symbols": "^0.44.3",
-    "tailwindcss": "4.2.4",
-    "vue": "3.5.32"
+    "axios": "1.20.0",
+    "daisyui": "5.7.46",
+    "material-symbols": "^0.47.5",
+    "tailwindcss": "4.3.3",
+    "vue": "3.5.43"
   }
 }
