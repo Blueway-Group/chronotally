@@ -3,6 +3,7 @@
 // Licensed under the LGPL-3.0 License. See LICENSE file for details.
 
 import BackToErpButton from './BackToErpButton.astro';
+import Preferences from './Preferences.astro';
 
 // Current route path for active state
 const currentPath = Astro.url.pathname;
@@ -89,19 +90,7 @@ const isActiveRoute = (itemPath: string) => {
     </li>
 
     <!-- Preferences -->
-    <li>
-      <a
-        href="/chronotally/preferences"
-        class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
-          isActiveRoute('/preferences') ? 'active bg-primary text-primary-content' : ''
-        }`}
-      >
-        <span class="material-symbols-rounded text-xl">
-          settings
-        </span>
-        <span class="font-medium">Preferences</span>
-      </a>
-    </li>
+    <Preferences />
 
     <!-- Back to ERP -->
     <BackToErpButton />
