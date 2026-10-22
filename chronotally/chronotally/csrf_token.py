@@ -1,8 +1,12 @@
 # Copyright (c) 2026 Blueway Consulting LLC.
 # Licensed under the LGPL-3.0 License. See LICENSE file for details.
 
+import os
+
 import frappe
 from frappe.utils import get_abbr
+
+from chronotally.config.support import SUPPORT_EMAIL
 
 # Disable caching for this page
 no_cache = 1
@@ -45,6 +49,9 @@ def extend_context(context):
 		context.csrf_token = csrf_token
 		context.site_name = frappe.local.site
 
+		# Add the app-owned support email to context
+		context.support_email = get_support_email()
+
 		# Add flattened user info to context
 		user_info = get_user_info()
 		context.user_name = user_info.get("name", "")
@@ -59,6 +66,25 @@ def extend_context(context):
 		context.has_invoice_permission = has_invoice_permission
 
 	return context
+
+
+"""Get the app's support email address"""
+
+
+def get_support_email():
+	"""Return the support contact address.
+
+	Priority order (highest first), so other apps' hooks can never override it:
+	1. Site/bench config `chronotally_support_email` in site_config.json or
+	   common_site_config.json.
+	2. The `CHRONOTALLY_SUPPORT_EMAIL` environment variable.
+	3. The app-owned `SUPPORT_EMAIL` constant.
+	"""
+	return (
+		frappe.conf.get("chronotally_support_email")
+		or os.environ.get("CHRONOTALLY_SUPPORT_EMAIL")
+		or SUPPORT_EMAIL
+	)
 
 
 """Get current user information"""

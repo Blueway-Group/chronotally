@@ -1,12 +1,14 @@
 # Copyright (c) 2025, Blueway Consulting LLC and Contributors
 # See license.txt
 
+import os
 from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from chronotally.chronotally.csrf_token import extend_context, get_user_info
+from chronotally.chronotally.csrf_token import extend_context, get_support_email, get_user_info
+from chronotally.config.support import SUPPORT_EMAIL
 
 
 class TestGetUserInfo(FrappeTestCase):
@@ -133,6 +135,26 @@ class TestExtendContext(FrappeTestCase):
 		result = extend_context(context)
 		self.assertEqual(result.site_name, "my-test-site")
 
+	@patch.dict(os.environ, {"CHRONOTALLY_SUPPORT_EMAIL": ""})
+	@patch("chronotally.chronotally.csrf_token.frappe")
+	def test_context_has_support_email(self, mock_frappe):
+		"""Context should contain the app-owned support email."""
+		mock_frappe.session.user = "Administrator"
+		mock_frappe.request = MagicMock()
+		mock_frappe.request.path = "/chronotally"
+		mock_frappe.local = MagicMock()
+		mock_frappe.sessions.get_csrf_token.return_value = "token"
+		mock_frappe.local.site = "testsite"
+		mock_frappe.has_permission.return_value = True
+		mock_frappe.get_value.return_value = "Admin"
+		mock_frappe.conf.get.return_value = None
+		mock_frappe.db = MagicMock()
+		mock_frappe.Redirect = frappe.Redirect
+
+		context = self._make_context()
+		result = extend_context(context)
+		self.assertEqual(result.support_email, SUPPORT_EMAIL)
+
 	@patch("chronotally.chronotally.csrf_token.frappe")
 	def test_context_has_current_route(self, mock_frappe):
 		"""Context should contain the current route."""
@@ -168,3 +190,27 @@ class TestExtendContext(FrappeTestCase):
 		context = self._make_context()
 		result = extend_context(context)
 		self.assertTrue(result.has_invoice_permission)
+
+
+class TestGetSupportEmail(FrappeTestCase):
+	"""Tests for get_support_email helper."""
+
+	@patch.dict(os.environ, {"CHRONOTALLY_SUPPORT_EMAIL": ""})
+	def test_returns_app_constant_by_default(self):
+		"""With nothing configured, the app-owned constant is used."""
+		with patch("chronotally.chronotally.csrf_token.frappe") as mock_frappe:
+			mock_frappe.conf.get.return_value = None
+			self.assertEqual(get_support_email(), SUPPORT_EMAIL)
+
+	@patch("chronotally.chronotally.csrf_token.frappe")
+	def test_site_config_takes_priority(self, mock_frappe):
+		"""A value in site_config/common_site_config overrides the constant."""
+		mock_frappe.conf.get.return_value = "support@example.com"
+		self.assertEqual(get_support_email(), "support@example.com")
+
+	@patch("chronotally.chronotally.csrf_token.frappe")
+	@patch.dict(os.environ, {"CHRONOTALLY_SUPPORT_EMAIL": "env@example.com"})
+	def test_env_var_used_when_no_site_config(self, mock_frappe):
+		"""The environment variable is used when site config is absent."""
+		mock_frappe.conf.get.return_value = None
+		self.assertEqual(get_support_email(), "env@example.com")
