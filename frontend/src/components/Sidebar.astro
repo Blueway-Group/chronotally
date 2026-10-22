@@ -81,6 +81,21 @@ const isActiveRoute = (itemPath: string) => {
       </a>
     </li>
 
+    <!-- Support -->
+    <li>
+      <a
+        href="/chronotally/support"
+        class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
+          isActiveRoute('/support') ? 'active bg-primary text-primary-content' : ''
+        }`}
+      >
+        <span class="material-symbols-rounded text-xl">
+          support_agent
+        </span>
+        <span class="font-medium">Support</span>
+      </a>
+    </li>
+
     <!-- Divider -->
     <div class="divider my-4"></div>
 
