@@ -70,7 +70,7 @@ The following are **not included** and are quoted separately as implementation w
 
 ## Contacting support
 
-- **Email:** support requests on both plans are submitted by email. The address is configured in ChronoTally's own `chronotally/config/support.py` (or overridden per site with the `chronotally_support_email` key in `site_config.json` / `common_site_config.json`) and is published on the in-app Support page at `/chronotally/support`.
+- **Email:** support requests on both plans are submitted by email. The address is defined in ChronoTally's own `chronotally/config/support.py` and is published on the in-app Support page at `/chronotally/support`.
 - **Video call (Premium):** request a call in your support email and the team will schedule it.
 
 ## Business days
