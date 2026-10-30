@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_datetime, nowdate
+from frappe.utils import add_days, add_months, cint, date_diff, flt, get_datetime, getdate, nowdate
 
 from chronotally.chronotally.utility_datetime import (
 	convert_iso_to_localized_datetime,
@@ -693,3 +693,366 @@ def create_invoice_from_billable_hours(
 	except Exception as e:
 		logger.error(f"Error creating Sales Invoice: {e!s}")
 		frappe.throw(_("Error creating Sales Invoice: {0}").format(f"{e!s}"))
+
+
+# ---------------------------------------------------------------------------
+# Reports
+# ---------------------------------------------------------------------------
+
+REPORT_MANAGER_ROLES = ("System Manager", "Projects Manager", "Accounts Manager")
+
+# Max number of series in the hours chart; remaining groups are merged into "Other"
+REPORT_CHART_MAX_SERIES = 8
+
+# Project / customer resolved from the time log first, then the timesheet header
+_REPORT_PROJECT_SQL = "COALESCE(NULLIF(td.project, ''), NULLIF(ts.parent_project, ''))"
+_REPORT_CUSTOMER_SQL = "COALESCE(NULLIF(ts.customer, ''), NULLIF(p.customer, ''))"
+_REPORT_DATE_SQL = "DATE(COALESCE(td.from_time, ts.start_date))"
+
+_REPORT_FROM_SQL = f"""
+	FROM `tabTimesheet Detail` td
+	INNER JOIN `tabTimesheet` ts ON ts.name = td.parent AND td.parenttype = 'Timesheet'
+	LEFT JOIN `tabProject` p ON p.name = {_REPORT_PROJECT_SQL}
+	LEFT JOIN `tabCustomer` c ON c.name = {_REPORT_CUSTOMER_SQL}
+"""
+
+# Time logs not yet linked to a submitted or draft Sales Invoice
+_REPORT_UNBILLED_SQL = """
+	ts.docstatus = 1
+	AND td.is_billable = 1
+	AND COALESCE(td.sales_invoice, '') = ''
+	AND NOT EXISTS (
+		SELECT 1 FROM `tabSales Invoice Timesheet` sit
+		INNER JOIN `tabSales Invoice` si ON si.name = sit.parent
+		WHERE sit.timesheet_detail = td.name AND si.docstatus < 2
+	)
+"""
+
+_REPORT_GROUP_BY_SQL = {
+	"project": f"COALESCE(p.project_name, {_REPORT_PROJECT_SQL}, 'No project')",
+	"customer": f"COALESCE(c.customer_name, {_REPORT_CUSTOMER_SQL}, 'No customer')",
+	"employee": "COALESCE(NULLIF(ts.employee_name, ''), ts.employee, 'No employee')",
+	"activity": "COALESCE(NULLIF(td.activity_type, ''), 'No activity')",
+	"billable": "CASE WHEN td.is_billable = 1 THEN 'Billable' ELSE 'Non-billable' END",
+}
+
+_REPORT_MEASURE_SQL = {
+	"hours": "SUM(td.hours)",
+	"amount": "SUM(CASE WHEN td.is_billable = 1 THEN td.billing_amount ELSE 0 END)",
+	"cost": "SUM(td.costing_amount)",
+}
+
+
+def _check_reports_access():
+	"""Reports expose company-wide financials; restrict them to manager roles."""
+	frappe.only_for(REPORT_MANAGER_ROLES)
+
+
+def _parse_report_dates(start_date, end_date):
+	if not start_date or not end_date:
+		frappe.throw(_("Both start_date and end_date are required"))
+	start, end = getdate(start_date), getdate(end_date)
+	if start > end:
+		frappe.throw(_("start_date must be before end_date"))
+	return start, end
+
+
+def _build_report_conditions(
+	start_date, end_date, customer=None, project=None, employee=None, include_drafts=None
+):
+	"""Build the WHERE clause shared by all report endpoints (the page's global filters)."""
+	conditions = [f"{_REPORT_DATE_SQL} BETWEEN %(start_date)s AND %(end_date)s"]
+	params = {"start_date": start_date, "end_date": end_date}
+
+	# Submitted + Billed by default (docstatus 1); drafts optional; cancelled never
+	if cint(include_drafts):
+		conditions.append("ts.docstatus IN (0, 1)")
+	else:
+		conditions.append("ts.docstatus = 1")
+
+	if customer:
+		conditions.append(f"{_REPORT_CUSTOMER_SQL} = %(customer)s")
+		params["customer"] = customer
+	if project:
+		conditions.append(f"{_REPORT_PROJECT_SQL} = %(project)s")
+		params["project"] = project
+	if employee:
+		conditions.append("ts.employee = %(employee)s")
+		params["employee"] = employee
+
+	return " AND ".join(conditions), params
+
+
+def _get_report_totals(conditions, params):
+	row = frappe.db.sql(
+		f"""
+		SELECT
+			COALESCE(SUM(td.hours), 0) AS total_hours,
+			COALESCE(SUM(CASE WHEN td.is_billable = 1 THEN td.hours ELSE 0 END), 0) AS billable_hours,
+			COALESCE(SUM(CASE WHEN td.is_billable = 1 THEN td.billing_amount ELSE 0 END), 0) AS revenue,
+			COALESCE(SUM(td.costing_amount), 0) AS cost
+		{_REPORT_FROM_SQL}
+		WHERE {conditions}
+		""",
+		params,
+		as_dict=True,
+	)[0]
+
+	total_hours = flt(row.total_hours)
+	billable_hours = flt(row.billable_hours)
+	revenue = flt(row.revenue)
+	cost = flt(row.cost)
+
+	return {
+		"total_hours": total_hours,
+		"billable_hours": billable_hours,
+		"utilization": (billable_hours / total_hours * 100) if total_hours else 0,
+		"revenue": revenue,
+		"cost": cost,
+		"margin": ((revenue - cost) / revenue * 100) if revenue else 0,
+	}
+
+
+@frappe.whitelist(allow_guest=False, methods=["GET"])
+def get_report_summary(
+	start_date: str | None = None,
+	end_date: str | None = None,
+	customer: str | None = None,
+	project: str | None = None,
+	employee: str | None = None,
+	include_drafts: str | None = None,
+):
+	"""KPIs for the reports page: hours, utilization, unbilled amount and margin,
+	plus the same-length prior period for comparison."""
+	_check_reports_access()
+	start, end = _parse_report_dates(start_date, end_date)
+	filters = {
+		"customer": customer,
+		"project": project,
+		"employee": employee,
+		"include_drafts": include_drafts,
+	}
+
+	conditions, params = _build_report_conditions(start, end, **filters)
+	current = _get_report_totals(conditions, params)
+
+	prior_end = add_days(start, -1)
+	prior_start = add_days(prior_end, -date_diff(end, start))
+	prior_conditions, prior_params = _build_report_conditions(prior_start, prior_end, **filters)
+	prior = _get_report_totals(prior_conditions, prior_params)
+
+	unbilled = frappe.db.sql(
+		f"""
+		SELECT
+			COALESCE(SUM(td.hours), 0) AS hours,
+			COALESCE(SUM(td.billing_amount), 0) AS amount,
+			COUNT(DISTINCT {_REPORT_CUSTOMER_SQL}) AS customers
+		{_REPORT_FROM_SQL}
+		WHERE {conditions} AND {_REPORT_UNBILLED_SQL}
+		""",
+		params,
+		as_dict=True,
+	)[0]
+
+	return {
+		**current,
+		"prior": {**prior, "start_date": str(prior_start), "end_date": str(prior_end)},
+		"unbilled_hours": flt(unbilled.hours),
+		"unbilled_amount": flt(unbilled.amount),
+		"unbilled_customers": unbilled.customers or 0,
+	}
+
+
+def _report_bucket(day, period):
+	"""Start date of the week (Monday) or month containing `day`."""
+	if period == "monthly":
+		return day.replace(day=1)
+	return add_days(day, -day.weekday())
+
+
+@frappe.whitelist(allow_guest=False, methods=["GET"])
+def get_report_hours_chart(
+	start_date: str | None = None,
+	end_date: str | None = None,
+	customer: str | None = None,
+	project: str | None = None,
+	employee: str | None = None,
+	include_drafts: str | None = None,
+	group_by: str | None = "project",
+	measure: str | None = "hours",
+	period: str | None = "weekly",
+):
+	"""Time series for the hours chart, one series per group."""
+	_check_reports_access()
+	start, end = _parse_report_dates(start_date, end_date)
+
+	if group_by not in _REPORT_GROUP_BY_SQL:
+		frappe.throw(_("Invalid group_by: {0}").format(group_by))
+	if measure not in _REPORT_MEASURE_SQL:
+		frappe.throw(_("Invalid measure: {0}").format(measure))
+	if period not in ("weekly", "monthly"):
+		frappe.throw(_("Invalid period: {0}").format(period))
+
+	conditions, params = _build_report_conditions(
+		start, end, customer=customer, project=project, employee=employee, include_drafts=include_drafts
+	)
+
+	rows = frappe.db.sql(
+		f"""
+		SELECT
+			{_REPORT_DATE_SQL} AS day,
+			{_REPORT_GROUP_BY_SQL[group_by]} AS label,
+			COALESCE({_REPORT_MEASURE_SQL[measure]}, 0) AS value
+		{_REPORT_FROM_SQL}
+		WHERE {conditions}
+		GROUP BY day, label
+		""",
+		params,
+		as_dict=True,
+	)
+
+	# Every bucket in the range, so empty weeks/months still show on the axis
+	buckets = []
+	bucket = _report_bucket(start, period)
+	while bucket <= end:
+		buckets.append(bucket)
+		bucket = add_days(bucket, 7) if period == "weekly" else getdate(add_months(bucket, 1))
+	bucket_index = {b: i for i, b in enumerate(buckets)}
+
+	values_by_label = {}
+	for row in rows:
+		values = values_by_label.setdefault(row.label, [0.0] * len(buckets))
+		values[bucket_index[_report_bucket(getdate(row.day), period)]] += flt(row.value)
+
+	# Largest groups first; collapse the tail into "Other"
+	ranked = sorted(values_by_label.items(), key=lambda item: sum(item[1]), reverse=True)
+	if len(ranked) > REPORT_CHART_MAX_SERIES:
+		head = ranked[: REPORT_CHART_MAX_SERIES - 1]
+		tail = [values for _label, values in ranked[REPORT_CHART_MAX_SERIES - 1 :]]
+		other = [sum(column) for column in zip(*tail, strict=True)]
+		ranked = [*head, ("Other", other)]
+
+	return {
+		"buckets": [str(b) for b in buckets],
+		"series": [{"label": label, "values": [round(v, 2) for v in values]} for label, values in ranked],
+		"group_by": group_by,
+		"measure": measure,
+		"period": period,
+	}
+
+
+@frappe.whitelist(allow_guest=False, methods=["GET"])
+def get_unbilled_by_customer(
+	start_date: str | None = None,
+	end_date: str | None = None,
+	customer: str | None = None,
+	project: str | None = None,
+	employee: str | None = None,
+	include_drafts: str | None = None,
+):
+	"""Submitted billable hours not yet on a Sales Invoice, grouped by customer."""
+	_check_reports_access()
+	start, end = _parse_report_dates(start_date, end_date)
+	conditions, params = _build_report_conditions(
+		start, end, customer=customer, project=project, employee=employee, include_drafts=include_drafts
+	)
+
+	rows = frappe.db.sql(
+		f"""
+		SELECT
+			{_REPORT_CUSTOMER_SQL} AS customer,
+			COALESCE(MAX(c.customer_name), {_REPORT_CUSTOMER_SQL}) AS customer_name,
+			COALESCE(SUM(td.hours), 0) AS hours,
+			COALESCE(SUM(td.billing_amount), 0) AS amount
+		{_REPORT_FROM_SQL}
+		WHERE {conditions} AND {_REPORT_UNBILLED_SQL}
+		GROUP BY customer
+		ORDER BY amount DESC
+		""",
+		params,
+		as_dict=True,
+	)
+
+	return [
+		{
+			"customer": row.customer,
+			"customer_name": row.customer_name or _("No customer"),
+			"hours": flt(row.hours),
+			"amount": flt(row.amount),
+		}
+		for row in rows
+	]
+
+
+# "Budget at Risk Amount" options in ChronoTally Settings -> Project fields; the first is the default
+BUDGET_AMOUNT_FIELDS = {
+	"Total Costing Amount": "total_costing_amount",
+	"Total Billable Amount": "total_billable_amount",
+	"Total Billed Amount": "total_billed_amount",
+}
+
+
+def _get_budget_amount_setting():
+	"""Return (label, Project fieldname) of the amount compared against each project's budget."""
+	label = frappe.db.get_single_value("ChronoTally Settings", "budget_amount_field")
+	if label not in BUDGET_AMOUNT_FIELDS:
+		label = next(iter(BUDGET_AMOUNT_FIELDS))
+	return label, BUDGET_AMOUNT_FIELDS[label]
+
+
+@frappe.whitelist(allow_guest=False, methods=["GET"])
+def get_budget_at_risk(customer: str | None = None, project: str | None = None):
+	"""Open projects with a submitted Budget, comparing a project amount to it.
+
+	`used_pct` = Project amount (chosen in ChronoTally Settings) / sum of submitted
+	Budget.budget_amount for the project. Budgets are project-lifetime figures, so the
+	page's date, employee and status filters don't apply.
+	"""
+	_check_reports_access()
+	amount_label, amount_field = _get_budget_amount_setting()
+
+	conditions = ["b.docstatus = 1", "b.budget_against = 'Project'", "p.status = 'Open'"]
+	params = {}
+	if customer:
+		conditions.append("p.customer = %(customer)s")
+		params["customer"] = customer
+	if project:
+		conditions.append("p.name = %(project)s")
+		params["project"] = project
+
+	# amount_field comes from the BUDGET_AMOUNT_FIELDS whitelist
+	rows = frappe.db.sql(
+		f"""
+		SELECT
+			p.name AS project,
+			COALESCE(NULLIF(p.project_name, ''), p.name) AS project_name,
+			p.customer,
+			COALESCE(c.customer_name, p.customer) AS customer_name,
+			COALESCE(p.{amount_field}, 0) AS amount,
+			COALESCE(SUM(b.budget_amount), 0) AS budget
+		FROM `tabBudget` b
+		INNER JOIN `tabProject` p ON p.name = b.project
+		LEFT JOIN `tabCustomer` c ON c.name = p.customer
+		WHERE {" AND ".join(conditions)}
+		GROUP BY p.name
+		HAVING budget > 0
+		""",
+		params,
+		as_dict=True,
+	)
+
+	result = [
+		{
+			"project": row.project,
+			"project_name": row.project_name,
+			"customer": row.customer,
+			"customer_name": row.customer_name or _("No customer"),
+			"amount": flt(row.amount),
+			"budget": flt(row.budget),
+			"used_pct": flt(row.amount) / flt(row.budget) * 100,
+		}
+		for row in rows
+	]
+	# Worst first
+	result.sort(key=lambda row: row["used_pct"], reverse=True)
+	return {"amount_label": _(amount_label), "rows": result}

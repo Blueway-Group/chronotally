@@ -66,7 +66,23 @@ const isActiveRoute = (itemPath: string) => {
       </a>
     </li>
 
-    <!-- Reports -->
+    <!-- Invoices -->
+    <li>
+      <a
+        href="/chronotally/invoices"
+        class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
+          isActiveRoute('/invoices') ? 'active bg-primary text-primary-content' : ''
+        }`}
+      >
+        <span class="material-symbols-rounded text-xl">
+          receipt_long
+        </span>
+        <span class="font-medium">Invoices</span>
+      </a>
+    </li>
+
+    <!-- Reports (manager roles only; rendered server-side by Frappe's Jinja) -->
+    <Fragment set:html="{% if has_reports_permission %}" />
     <li>
       <a
         href="/chronotally/reports"
@@ -80,6 +96,7 @@ const isActiveRoute = (itemPath: string) => {
         <span class="font-medium">Reports</span>
       </a>
     </li>
+    <Fragment set:html="{% endif %}" />
 
     <!-- Divider -->
     <div class="divider my-4"></div>

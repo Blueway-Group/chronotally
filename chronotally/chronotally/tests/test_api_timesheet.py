@@ -8,16 +8,23 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from chronotally.chronotally.api_timesheet import (
+	BUDGET_AMOUNT_FIELDS,
+	_get_budget_amount_setting,
+	_report_bucket,
 	append_local_timezone,
 	cancel_timesheet,
 	create_invoice_from_billable_hours,
+	get_budget_at_risk,
 	get_chronotally_settings,
 	get_new_timesheet_data,
+	get_report_hours_chart,
+	get_report_summary,
 	get_timesheet_details,
 	get_timesheet_list,
 	get_timesheet_stats,
 	get_timesheet_status_stats,
 	get_timesheets,
+	get_unbilled_by_customer,
 	to_iso,
 )
 
@@ -380,6 +387,163 @@ class TestCreateInvoiceFromBillableHours(FrappeTestCase):
 				project="Test Project",
 				item="Test Item",
 			)
+
+
+class TestReportAccess(FrappeTestCase):
+	"""Report endpoints are limited to manager roles."""
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+
+	def test_guest_denied(self):
+		frappe.set_user("Guest")
+		for endpoint in (get_report_summary, get_report_hours_chart, get_unbilled_by_customer):
+			with self.assertRaises(frappe.PermissionError):
+				endpoint(start_date="2025-01-01", end_date="2025-01-31")
+
+
+class TestGetReportSummary(FrappeTestCase):
+	"""Tests for get_report_summary API endpoint."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+
+	def test_missing_dates_throws(self):
+		with self.assertRaises(frappe.ValidationError):
+			get_report_summary(start_date="2025-01-01")
+
+	def test_inverted_dates_throws(self):
+		with self.assertRaises(frappe.ValidationError):
+			get_report_summary(start_date="2025-02-01", end_date="2025-01-01")
+
+	def test_returns_kpi_structure(self):
+		result = get_report_summary(start_date="2025-01-01", end_date="2025-02-25", include_drafts="1")
+		for key in (
+			"total_hours",
+			"billable_hours",
+			"utilization",
+			"revenue",
+			"cost",
+			"margin",
+			"unbilled_hours",
+			"unbilled_amount",
+			"unbilled_customers",
+			"prior",
+		):
+			self.assertIn(key, result)
+		self.assertGreaterEqual(result["utilization"], 0)
+		self.assertLessEqual(result["utilization"], 100)
+
+	def test_prior_period_has_same_length(self):
+		result = get_report_summary(start_date="2025-03-01", end_date="2025-03-10")
+		self.assertEqual(result["prior"]["start_date"], "2025-02-19")
+		self.assertEqual(result["prior"]["end_date"], "2025-02-28")
+
+	def test_unknown_filters_return_zero(self):
+		result = get_report_summary(
+			start_date="2025-01-01", end_date="2025-01-31", customer="__no_such_customer__"
+		)
+		self.assertEqual(result["total_hours"], 0)
+		self.assertEqual(result["margin"], 0)
+		self.assertEqual(result["unbilled_customers"], 0)
+
+
+class TestGetReportHoursChart(FrappeTestCase):
+	"""Tests for get_report_hours_chart API endpoint."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+
+	def test_invalid_group_by_throws(self):
+		with self.assertRaises(frappe.ValidationError):
+			get_report_hours_chart(start_date="2025-01-01", end_date="2025-01-31", group_by="company")
+
+	def test_invalid_measure_throws(self):
+		with self.assertRaises(frappe.ValidationError):
+			get_report_hours_chart(start_date="2025-01-01", end_date="2025-01-31", measure="profit")
+
+	def test_weekly_buckets_cover_range(self):
+		# 2025-01-01 is a Wednesday; first bucket is the Monday before
+		result = get_report_hours_chart(start_date="2025-01-01", end_date="2025-01-31", period="weekly")
+		self.assertEqual(result["buckets"][0], "2024-12-30")
+		self.assertEqual(result["buckets"][-1], "2025-01-27")
+		for series in result["series"]:
+			self.assertEqual(len(series["values"]), len(result["buckets"]))
+
+	def test_monthly_buckets(self):
+		result = get_report_hours_chart(start_date="2025-01-15", end_date="2025-03-02", period="monthly")
+		self.assertEqual(result["buckets"], ["2025-01-01", "2025-02-01", "2025-03-01"])
+
+	def test_all_group_by_and_measures(self):
+		for group_by in ("project", "customer", "employee", "activity", "billable"):
+			for measure in ("hours", "amount", "cost"):
+				result = get_report_hours_chart(
+					start_date="2025-01-01", end_date="2025-03-31", group_by=group_by, measure=measure
+				)
+				self.assertLessEqual(len(result["series"]), 8)
+
+
+class TestReportBucket(FrappeTestCase):
+	"""Tests for _report_bucket helper."""
+
+	def test_weekly_returns_monday(self):
+		self.assertEqual(str(_report_bucket(frappe.utils.getdate("2025-01-05"), "weekly")), "2024-12-30")
+
+	def test_monthly_returns_first_day(self):
+		self.assertEqual(str(_report_bucket(frappe.utils.getdate("2025-02-17"), "monthly")), "2025-02-01")
+
+
+class TestGetUnbilledByCustomer(FrappeTestCase):
+	"""Tests for get_unbilled_by_customer API endpoint."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+
+	def test_returns_sorted_rows(self):
+		rows = get_unbilled_by_customer(start_date="2024-01-01", end_date="2026-12-31")
+		self.assertIsInstance(rows, list)
+		amounts = [row["amount"] for row in rows]
+		self.assertEqual(amounts, sorted(amounts, reverse=True))
+		for row in rows:
+			self.assertIn("customer", row)
+			self.assertIn("customer_name", row)
+			self.assertIn("hours", row)
+
+
+class TestGetBudgetAtRisk(FrappeTestCase):
+	"""Tests for get_budget_at_risk API endpoint."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+
+	def test_guest_denied(self):
+		frappe.set_user("Guest")
+		with self.assertRaises(frappe.PermissionError):
+			get_budget_at_risk()
+
+	def test_rows_sorted_worst_first(self):
+		response = get_budget_at_risk()
+		self.assertIn(response["amount_label"], BUDGET_AMOUNT_FIELDS)
+		used = [row["used_pct"] for row in response["rows"]]
+		self.assertEqual(used, sorted(used, reverse=True))
+		for row in response["rows"]:
+			self.assertGreater(row["budget"], 0)
+			self.assertAlmostEqual(row["used_pct"], row["amount"] / row["budget"] * 100)
+
+	def test_unknown_project_returns_empty(self):
+		self.assertEqual(get_budget_at_risk(project="__no_such_project__")["rows"], [])
+
+	def test_amount_field_follows_settings(self):
+		for label, fieldname in BUDGET_AMOUNT_FIELDS.items():
+			with patch("frappe.db.get_single_value", return_value=label):
+				self.assertEqual(_get_budget_amount_setting(), (label, fieldname))
+
+	def test_amount_field_defaults_to_costing(self):
+		with patch("frappe.db.get_single_value", return_value=None):
+			self.assertEqual(_get_budget_amount_setting(), ("Total Costing Amount", "total_costing_amount"))
 
 
 # ── Test Helpers ─────────────────────────────────────────────────────────────
