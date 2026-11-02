@@ -1,0 +1,270 @@
+---
+// Copyright (c) 2026 Blueway Consulting LLC.
+// Licensed under the LGPL-3.0 License. See LICENSE file for details.
+
+import Layout from '../layouts/Layout.astro'
+
+// Frappe replaces this placeholder at request time (see `chronotally/chronotally/csrf_token.py`
+// and `chronotally/config/support.py`). It must remain the literal `{{ support_email }}`
+// string in the built HTML, so it is never evaluated or interpolated here.
+const supportEmail = '{{ support_email }}'
+
+const planFeatures = [
+  { label: 'Monthly price', free: '0 USD', premium: '9 USD' },
+  { label: 'Contact channels', free: 'Email', premium: 'Video call or email' },
+  { label: 'Support priority', free: 'General queue', premium: 'Absolute priority case handling' },
+  { label: 'Work sessions', free: 'Not included', premium: '1 free session per month (max. 15 minutes)' },
+  { label: 'Response time', free: 'Up to 7 calendar days', premium: 'Within 24 hours on business days' },
+]
+
+const quotedSeparately = [
+  'Custom development or code changes',
+  'Customizations and specific configurations',
+  'Third-party integrations',
+  'Data migration',
+  'Design or business-logic changes',
+]
+
+const productUrl = 'https://chronotally.bluewayglobal.com'
+const repoUrl = 'https://github.com/Blueway-Group/chronotally'
+
+const productLink = `${productUrl}/?${new URLSearchParams({
+  utm_source: 'chronotally',
+  utm_medium: 'in_app',
+  utm_campaign: 'support_page',
+  utm_content: 'product_page_card',
+}).toString()}`
+---
+
+<Layout title="ChronoTally - Support">
+  <div class="container mx-auto p-6 space-y-6">
+    <!-- Hero Header -->
+    <div class="hero bg-gradient-to-r from-primary/10 to-secondary/10 rounded-box">
+      <div class="hero-content text-center py-10">
+        <div class="max-w-3xl">
+          <span class="material-symbols-rounded text-5xl text-primary">
+            support_agent
+          </span>
+          <h1 class="text-3xl font-bold mt-3">Support</h1>
+          <p class="text-base-content/70 mt-2">
+            ChronoTally is free to use. Optional support plans add faster responses, direct access to the team, and hands-on help.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plan Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Free Plan -->
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="card-title">Free Plan</h2>
+            <span class="badge badge-ghost">Included</span>
+          </div>
+
+          <p class="text-3xl font-bold">0 USD <span class="text-base font-normal text-base-content/60">/ month</span></p>
+
+          <ul class="list-disc list-inside space-y-2 text-sm mt-2">
+            <li>Email support in the general queue</li>
+            <li>Response time of up to 7 calendar days</li>
+            <li>Platform maintenance: stability, availability, and error correction</li>
+          </ul>
+
+          <div class="card-actions justify-end mt-4">
+            <a class="btn btn-outline gap-2" href={`mailto:${supportEmail}`}>
+              <span class="material-symbols-rounded text-xl">
+                mail
+              </span>
+              Email support
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium Plan -->
+      <div class="card bg-base-100 shadow-xl border-2 border-primary">
+        <div class="card-body">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="card-title">Premium Plan</h2>
+            <span class="badge badge-primary">Optional upgrade</span>
+          </div>
+
+          <p class="text-3xl font-bold">9 USD <span class="text-base font-normal text-base-content/60">/ month</span></p>
+
+          <ul class="list-disc list-inside space-y-2 text-sm mt-2">
+            <li><strong>Absolute priority</strong> case handling</li>
+            <li>Video call or email contact channels</li>
+            <li><strong>One free work session per month</strong> (max. 15 minutes)</li>
+            <li>extra blocks at 6 USD per 15 minutes</li>
+            <li><strong>24-hour response time</strong> on business days</li>
+          </ul>
+
+          <div class="card-actions justify-end mt-4">
+            <a class="btn btn-primary gap-2" href={`mailto:${supportEmail}`}>
+              <span class="material-symbols-rounded text-xl">
+                mail
+              </span>
+              Get Premium support
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compare Plans -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">
+          <span class="material-symbols-rounded text-xl">
+            compare_arrows
+          </span>
+          Compare plans
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Free Plan</th>
+                <th>Premium Plan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {planFeatures.map((feature) => (
+                <tr>
+                  <td class="font-medium">{feature.label}</td>
+                  <td>{feature.free}</td>
+                  <td>{feature.premium}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <p class="text-xs text-base-content/60 mt-4">
+          Premium response time: acknowledgment of receipt, initial diagnosis, and severity assignment — not necessarily immediate final resolution. If the response time is missed more than three (3) consecutive times in the same billed month, a credit equal to 10% of the monthly fee is applied to the next invoice.
+        </p>
+      </div>
+    </div>
+
+    <!-- Scope of Support -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">
+          <span class="material-symbols-rounded text-xl">
+            handyman
+          </span>
+          Scope of support
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <h3 class="font-semibold mb-2">Covered by support</h3>
+            <p class="text-sm text-base-content/70">
+              Platform maintenance: preventive and corrective tasks performed by the maintainers to ensure stability, operational availability, and error correction of the application's base system.
+            </p>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Quoted separately as implementation</h3>
+            <ul class="list-disc list-inside space-y-2 text-sm text-base-content/70">
+              {quotedSeparately.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+            <p class="text-xs text-base-content/60 mt-3">
+              These items are not included in either plan and are quoted separately as implementation work.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product & Source -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">
+          <span class="material-symbols-rounded text-xl">
+            link
+          </span>
+          Product &amp; source
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <a
+            href={productLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block rounded-box border border-base-300 p-5 hover:border-primary transition-colors"
+          >
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-rounded text-xl text-primary">
+                open_in_new
+              </span>
+              <span class="font-semibold">Product page</span>
+            </div>
+            <p class="text-sm font-mono text-primary mt-2">chronotally.bluewayglobal.com</p>
+            <p class="text-sm text-base-content/70 mt-1">
+              Learn more about ChronoTally, the optional support plans, and the team behind it.
+            </p>
+          </a>
+
+          <a
+            href={repoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block rounded-box border border-base-300 p-5 hover:border-primary transition-colors"
+          >
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-rounded text-xl text-primary">
+                open_in_new
+              </span>
+              <span class="font-semibold">Source code</span>
+            </div>
+            <p class="text-sm font-mono text-primary mt-2">github.com/Blueway-Group/chronotally</p>
+            <p class="text-sm text-base-content/70 mt-1">
+              Browse the source, report issues, and follow the latest releases.
+            </p>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Support -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">
+          <span class="material-symbols-rounded text-xl">
+            contact_support
+          </span>
+          Contact support
+        </h2>
+
+        <p class="text-sm text-base-content/70">
+          Support requests on both plans are submitted by email. Premium customers may also request a video call with the team.
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3 mt-2">
+          <a class="btn btn-primary gap-2" href={`mailto:${supportEmail}`}>
+            <span class="material-symbols-rounded text-xl">
+              mail
+            </span>
+            Email support
+          </a>
+          <code class="text-sm text-base-content/70">{supportEmail}</code>
+        </div>
+
+        <p class="text-xs text-base-content/60 mt-4">
+          Business days are Monday through Friday, excluding US official holidays and mandatory rest days. See the <a
+            href={`${repoUrl}/blob/main/COMMERCIAL_LICENSE`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link link-hover">ChronoTally Commercial License</a
+          > for licensing terms.
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>

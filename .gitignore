@@ -4,6 +4,7 @@
 *.swp
 tags
 node_modules
+frontend/.astro/
 __pycache__
 .venv
 .ruff_cache
