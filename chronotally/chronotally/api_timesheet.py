@@ -7,7 +7,10 @@ from datetime import datetime, timezone
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import Case, Criterion, DocType, Field, Order
+from frappe.query_builder.functions import Coalesce, Count, Date, Max, NullIf, Sum
 from frappe.utils import add_days, add_months, cint, date_diff, flt, get_datetime, getdate, nowdate
+from pypika.terms import ExistsCriterion
 
 from chronotally.chronotally.utility_datetime import (
 	convert_iso_to_localized_datetime,
@@ -704,43 +707,89 @@ REPORT_MANAGER_ROLES = ("System Manager", "Projects Manager", "Accounts Manager"
 # Max number of series in the hours chart; remaining groups are merged into "Other"
 REPORT_CHART_MAX_SERIES = 8
 
-# Project / customer resolved from the time log first, then the timesheet header
-_REPORT_PROJECT_SQL = "COALESCE(NULLIF(td.project, ''), NULLIF(ts.parent_project, ''))"
-_REPORT_CUSTOMER_SQL = "COALESCE(NULLIF(ts.customer, ''), NULLIF(p.customer, ''))"
-_REPORT_DATE_SQL = "DATE(COALESCE(td.from_time, ts.start_date))"
 
-_REPORT_FROM_SQL = f"""
-	FROM `tabTimesheet Detail` td
-	INNER JOIN `tabTimesheet` ts ON ts.name = td.parent AND td.parenttype = 'Timesheet'
-	LEFT JOIN `tabProject` p ON p.name = {_REPORT_PROJECT_SQL}
-	LEFT JOIN `tabCustomer` c ON c.name = {_REPORT_CUSTOMER_SQL}
-"""
+class _ReportSource:
+	"""Tables and derived columns shared by the report queries (built with frappe.qb so every
+	value is parameterized)."""
 
-# Time logs not yet linked to a submitted or draft Sales Invoice
-_REPORT_UNBILLED_SQL = """
-	ts.docstatus = 1
-	AND td.is_billable = 1
-	AND COALESCE(td.sales_invoice, '') = ''
-	AND NOT EXISTS (
-		SELECT 1 FROM `tabSales Invoice Timesheet` sit
-		INNER JOIN `tabSales Invoice` si ON si.name = sit.parent
-		WHERE sit.timesheet_detail = td.name AND si.docstatus < 2
-	)
-"""
+	def __init__(self):
+		self.td = DocType("Timesheet Detail")
+		self.ts = DocType("Timesheet")
+		self.p = DocType("Project")
+		self.c = DocType("Customer")
+		td, ts, p, c = self.td, self.ts, self.p, self.c
 
-_REPORT_GROUP_BY_SQL = {
-	"project": f"COALESCE(p.project_name, {_REPORT_PROJECT_SQL}, 'No project')",
-	"customer": f"COALESCE(c.customer_name, {_REPORT_CUSTOMER_SQL}, 'No customer')",
-	"employee": "COALESCE(NULLIF(ts.employee_name, ''), ts.employee, 'No employee')",
-	"activity": "COALESCE(NULLIF(td.activity_type, ''), 'No activity')",
-	"billable": "CASE WHEN td.is_billable = 1 THEN 'Billable' ELSE 'Non-billable' END",
-}
+		# Project / customer resolved from the time log first, then the timesheet header
+		self.project = Coalesce(NullIf(td.project, ""), NullIf(ts.parent_project, ""))
+		self.customer = Coalesce(NullIf(ts.customer, ""), NullIf(p.customer, ""))
+		self.day = Date(Coalesce(td.from_time, ts.start_date))
+		self.billable_hours = Case().when(td.is_billable == 1, td.hours).else_(0)
+		self.billable_amount = Case().when(td.is_billable == 1, td.billing_amount).else_(0)
 
-_REPORT_MEASURE_SQL = {
-	"hours": "SUM(td.hours)",
-	"amount": "SUM(CASE WHEN td.is_billable = 1 THEN td.billing_amount ELSE 0 END)",
-	"cost": "SUM(td.costing_amount)",
-}
+		self.group_by = {
+			"project": Coalesce(p.project_name, self.project, "No project"),
+			"customer": Coalesce(c.customer_name, self.customer, "No customer"),
+			"employee": Coalesce(NullIf(ts.employee_name, ""), ts.employee, "No employee"),
+			"activity": Coalesce(NullIf(td.activity_type, ""), "No activity"),
+			"billable": Case().when(td.is_billable == 1, "Billable").else_("Non-billable"),
+		}
+		self.measure = {
+			"hours": Sum(td.hours),
+			"amount": Sum(self.billable_amount),
+			"cost": Sum(td.costing_amount),
+		}
+
+	def query(self):
+		td, ts, p, c = self.td, self.ts, self.p, self.c
+		return (
+			frappe.qb.from_(td)
+			.inner_join(ts)
+			.on((ts.name == td.parent) & (td.parenttype == "Timesheet"))
+			.left_join(p)
+			.on(p.name == self.project)
+			.left_join(c)
+			.on(c.name == self.customer)
+		)
+
+	def conditions(
+		self, start_date, end_date, customer=None, project=None, employee=None, include_drafts=None
+	):
+		"""WHERE criterion shared by all report endpoints (the page's global filters)."""
+		conditions = [self.day[start_date:end_date]]
+
+		# Submitted + Billed by default (docstatus 1); drafts optional; cancelled never
+		if cint(include_drafts):
+			conditions.append(self.ts.docstatus.isin([0, 1]))
+		else:
+			conditions.append(self.ts.docstatus == 1)
+
+		if customer:
+			conditions.append(self.customer == customer)
+		if project:
+			conditions.append(self.project == project)
+		if employee:
+			conditions.append(self.ts.employee == employee)
+
+		return Criterion.all(conditions)
+
+	def unbilled(self):
+		"""Time logs not yet linked to a submitted or draft Sales Invoice."""
+		td = self.td
+		sit = DocType("Sales Invoice Timesheet")
+		si = DocType("Sales Invoice")
+		invoiced = (
+			frappe.qb.from_(sit)
+			.inner_join(si)
+			.on(si.name == sit.parent)
+			.select(sit.name)
+			.where((sit.timesheet_detail == td.name) & (si.docstatus < 2))
+		)
+		return (
+			(self.ts.docstatus == 1)
+			& (td.is_billable == 1)
+			& (Coalesce(td.sales_invoice, "") == "")
+			& ExistsCriterion(invoiced).negate()
+		)
 
 
 def _check_reports_access():
@@ -757,45 +806,18 @@ def _parse_report_dates(start_date, end_date):
 	return start, end
 
 
-def _build_report_conditions(
-	start_date, end_date, customer=None, project=None, employee=None, include_drafts=None
-):
-	"""Build the WHERE clause shared by all report endpoints (the page's global filters)."""
-	conditions = [f"{_REPORT_DATE_SQL} BETWEEN %(start_date)s AND %(end_date)s"]
-	params = {"start_date": start_date, "end_date": end_date}
-
-	# Submitted + Billed by default (docstatus 1); drafts optional; cancelled never
-	if cint(include_drafts):
-		conditions.append("ts.docstatus IN (0, 1)")
-	else:
-		conditions.append("ts.docstatus = 1")
-
-	if customer:
-		conditions.append(f"{_REPORT_CUSTOMER_SQL} = %(customer)s")
-		params["customer"] = customer
-	if project:
-		conditions.append(f"{_REPORT_PROJECT_SQL} = %(project)s")
-		params["project"] = project
-	if employee:
-		conditions.append("ts.employee = %(employee)s")
-		params["employee"] = employee
-
-	return " AND ".join(conditions), params
-
-
-def _get_report_totals(conditions, params):
-	row = frappe.db.sql(
-		f"""
-		SELECT
-			COALESCE(SUM(td.hours), 0) AS total_hours,
-			COALESCE(SUM(CASE WHEN td.is_billable = 1 THEN td.hours ELSE 0 END), 0) AS billable_hours,
-			COALESCE(SUM(CASE WHEN td.is_billable = 1 THEN td.billing_amount ELSE 0 END), 0) AS revenue,
-			COALESCE(SUM(td.costing_amount), 0) AS cost
-		{_REPORT_FROM_SQL}
-		WHERE {conditions}
-		""",
-		params,
-		as_dict=True,
+def _get_report_totals(source, conditions):
+	td = source.td
+	row = (
+		source.query()
+		.select(
+			Coalesce(Sum(td.hours), 0).as_("total_hours"),
+			Coalesce(Sum(source.billable_hours), 0).as_("billable_hours"),
+			Coalesce(Sum(source.billable_amount), 0).as_("revenue"),
+			Coalesce(Sum(td.costing_amount), 0).as_("cost"),
+		)
+		.where(conditions)
+		.run(as_dict=True)
 	)[0]
 
 	total_hours = flt(row.total_hours)
@@ -833,25 +855,24 @@ def get_report_summary(
 		"include_drafts": include_drafts,
 	}
 
-	conditions, params = _build_report_conditions(start, end, **filters)
-	current = _get_report_totals(conditions, params)
+	source = _ReportSource()
+	conditions = source.conditions(start, end, **filters)
+	current = _get_report_totals(source, conditions)
 
 	prior_end = add_days(start, -1)
 	prior_start = add_days(prior_end, -date_diff(end, start))
-	prior_conditions, prior_params = _build_report_conditions(prior_start, prior_end, **filters)
-	prior = _get_report_totals(prior_conditions, prior_params)
+	prior = _get_report_totals(source, source.conditions(prior_start, prior_end, **filters))
 
-	unbilled = frappe.db.sql(
-		f"""
-		SELECT
-			COALESCE(SUM(td.hours), 0) AS hours,
-			COALESCE(SUM(td.billing_amount), 0) AS amount,
-			COUNT(DISTINCT {_REPORT_CUSTOMER_SQL}) AS customers
-		{_REPORT_FROM_SQL}
-		WHERE {conditions} AND {_REPORT_UNBILLED_SQL}
-		""",
-		params,
-		as_dict=True,
+	td = source.td
+	unbilled = (
+		source.query()
+		.select(
+			Coalesce(Sum(td.hours), 0).as_("hours"),
+			Coalesce(Sum(td.billing_amount), 0).as_("amount"),
+			Count(source.customer).distinct().as_("customers"),
+		)
+		.where(conditions & source.unbilled())
+		.run(as_dict=True)
 	)[0]
 
 	return {
@@ -885,30 +906,29 @@ def get_report_hours_chart(
 	"""Time series for the hours chart, one series per group."""
 	_check_reports_access()
 	start, end = _parse_report_dates(start_date, end_date)
+	source = _ReportSource()
 
-	if group_by not in _REPORT_GROUP_BY_SQL:
+	if group_by not in source.group_by:
 		frappe.throw(_("Invalid group_by: {0}").format(group_by))
-	if measure not in _REPORT_MEASURE_SQL:
+	if measure not in source.measure:
 		frappe.throw(_("Invalid measure: {0}").format(measure))
 	if period not in ("weekly", "monthly"):
 		frappe.throw(_("Invalid period: {0}").format(period))
 
-	conditions, params = _build_report_conditions(
+	conditions = source.conditions(
 		start, end, customer=customer, project=project, employee=employee, include_drafts=include_drafts
 	)
 
-	rows = frappe.db.sql(
-		f"""
-		SELECT
-			{_REPORT_DATE_SQL} AS day,
-			{_REPORT_GROUP_BY_SQL[group_by]} AS label,
-			COALESCE({_REPORT_MEASURE_SQL[measure]}, 0) AS value
-		{_REPORT_FROM_SQL}
-		WHERE {conditions}
-		GROUP BY day, label
-		""",
-		params,
-		as_dict=True,
+	rows = (
+		source.query()
+		.select(
+			source.day.as_("day"),
+			source.group_by[group_by].as_("label"),
+			Coalesce(source.measure[measure], 0).as_("value"),
+		)
+		.where(conditions)
+		.groupby(Field("day"), Field("label"))
+		.run(as_dict=True)
 	)
 
 	# Every bucket in the range, so empty weeks/months still show on the axis
@@ -953,24 +973,24 @@ def get_unbilled_by_customer(
 	"""Submitted billable hours not yet on a Sales Invoice, grouped by customer."""
 	_check_reports_access()
 	start, end = _parse_report_dates(start_date, end_date)
-	conditions, params = _build_report_conditions(
+	source = _ReportSource()
+	conditions = source.conditions(
 		start, end, customer=customer, project=project, employee=employee, include_drafts=include_drafts
 	)
 
-	rows = frappe.db.sql(
-		f"""
-		SELECT
-			{_REPORT_CUSTOMER_SQL} AS customer,
-			COALESCE(MAX(c.customer_name), {_REPORT_CUSTOMER_SQL}) AS customer_name,
-			COALESCE(SUM(td.hours), 0) AS hours,
-			COALESCE(SUM(td.billing_amount), 0) AS amount
-		{_REPORT_FROM_SQL}
-		WHERE {conditions} AND {_REPORT_UNBILLED_SQL}
-		GROUP BY customer
-		ORDER BY amount DESC
-		""",
-		params,
-		as_dict=True,
+	td = source.td
+	rows = (
+		source.query()
+		.select(
+			source.customer.as_("customer"),
+			Coalesce(Max(source.c.customer_name), source.customer).as_("customer_name"),
+			Coalesce(Sum(td.hours), 0).as_("hours"),
+			Coalesce(Sum(td.billing_amount), 0).as_("amount"),
+		)
+		.where(conditions & source.unbilled())
+		.groupby(Field("customer"))
+		.orderby(Field("amount"), order=Order.desc)
+		.run(as_dict=True)
 	)
 
 	return [
@@ -1011,34 +1031,35 @@ def get_budget_at_risk(customer: str | None = None, project: str | None = None):
 	_check_reports_access()
 	amount_label, amount_field = _get_budget_amount_setting()
 
-	conditions = ["b.docstatus = 1", "b.budget_against = 'Project'", "p.status = 'Open'"]
-	params = {}
+	b = DocType("Budget")
+	p = DocType("Project")
+	c = DocType("Customer")
+	conditions = [b.docstatus == 1, b.budget_against == "Project", p.status == "Open"]
 	if customer:
-		conditions.append("p.customer = %(customer)s")
-		params["customer"] = customer
+		conditions.append(p.customer == customer)
 	if project:
-		conditions.append("p.name = %(project)s")
-		params["project"] = project
+		conditions.append(p.name == project)
 
-	# amount_field comes from the BUDGET_AMOUNT_FIELDS whitelist
-	rows = frappe.db.sql(
-		f"""
-		SELECT
-			p.name AS project,
-			COALESCE(NULLIF(p.project_name, ''), p.name) AS project_name,
+	budget = Sum(b.budget_amount)
+	rows = (
+		frappe.qb.from_(b)
+		.inner_join(p)
+		.on(p.name == b.project)
+		.left_join(c)
+		.on(c.name == p.customer)
+		.select(
+			p.name.as_("project"),
+			Coalesce(NullIf(p.project_name, ""), p.name).as_("project_name"),
 			p.customer,
-			COALESCE(c.customer_name, p.customer) AS customer_name,
-			COALESCE(p.{amount_field}, 0) AS amount,
-			COALESCE(SUM(b.budget_amount), 0) AS budget
-		FROM `tabBudget` b
-		INNER JOIN `tabProject` p ON p.name = b.project
-		LEFT JOIN `tabCustomer` c ON c.name = p.customer
-		WHERE {" AND ".join(conditions)}
-		GROUP BY p.name
-		HAVING budget > 0
-		""",
-		params,
-		as_dict=True,
+			Coalesce(c.customer_name, p.customer).as_("customer_name"),
+			# amount_field comes from the BUDGET_AMOUNT_FIELDS whitelist
+			Coalesce(p[amount_field], 0).as_("amount"),
+			Coalesce(budget, 0).as_("budget"),
+		)
+		.where(Criterion.all(conditions))
+		.groupby(p.name)
+		.having(budget > 0)
+		.run(as_dict=True)
 	)
 
 	result = [
