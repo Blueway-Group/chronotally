@@ -793,8 +793,12 @@ class _ReportSource:
 
 
 def _check_reports_access():
-	"""Reports expose company-wide financials; restrict them to manager roles."""
-	frappe.only_for(REPORT_MANAGER_ROLES)
+	"""Reports expose company-wide financials; restrict them to manager roles.
+
+	Checked by hand rather than with frappe.only_for, which v15 skips while tests run.
+	"""
+	if not set(frappe.get_roles()) & set(REPORT_MANAGER_ROLES):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 
 def _parse_report_dates(start_date, end_date):
@@ -1025,7 +1029,7 @@ def get_budget_at_risk(customer: str | None = None, project: str | None = None):
 	"""Open projects with a submitted Budget, comparing a project amount to it.
 
 	`used_pct` = Project amount (chosen in ChronoTally Settings) / sum of submitted
-	Budget.budget_amount for the project. Budgets are project-lifetime figures, so the
+	Budget amounts for the project. Budgets are project-lifetime figures, so the
 	page's date, employee and status filters don't apply.
 	"""
 	_check_reports_access()
@@ -1040,10 +1044,17 @@ def get_budget_at_risk(customer: str | None = None, project: str | None = None):
 	if project:
 		conditions.append(p.name == project)
 
-	budget = Sum(b.budget_amount)
+	query = frappe.qb.from_(b)
+	# ERPNext v16 stores budget_amount on the Budget; v15 on its Budget Account rows
+	if frappe.get_meta("Budget").has_field("budget_amount"):
+		budget = Sum(b.budget_amount)
+	else:
+		ba = DocType("Budget Account")
+		query = query.inner_join(ba).on((ba.parent == b.name) & (ba.parenttype == "Budget"))
+		budget = Sum(ba.budget_amount)
+
 	rows = (
-		frappe.qb.from_(b)
-		.inner_join(p)
+		query.inner_join(p)
 		.on(p.name == b.project)
 		.left_join(c)
 		.on(c.name == p.customer)
