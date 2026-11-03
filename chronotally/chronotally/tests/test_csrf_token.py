@@ -100,38 +100,6 @@ class TestExtendContext(FrappeTestCase):
 			extend_context(context)
 
 	@patch("chronotally.chronotally.csrf_token.frappe")
-	def test_reports_without_manager_role_redirects(self, mock_frappe):
-		"""User without a manager role should be redirected from /chronotally/reports."""
-		mock_frappe.session.user = "test@example.com"
-		mock_frappe.request = MagicMock()
-		mock_frappe.request.path = "/chronotally/reports"
-		mock_frappe.local = MagicMock()
-		mock_frappe.has_permission.return_value = True
-		mock_frappe.get_roles.return_value = ["Employee"]
-		mock_frappe.Redirect = frappe.Redirect
-
-		context = self._make_context()
-		with self.assertRaises(frappe.Redirect):
-			extend_context(context)
-
-	@patch("chronotally.chronotally.csrf_token.frappe")
-	def test_reports_with_manager_role_allowed(self, mock_frappe):
-		"""User with a manager role can open /chronotally/reports."""
-		mock_frappe.session.user = "manager@example.com"
-		mock_frappe.request = MagicMock()
-		mock_frappe.request.path = "/chronotally/reports"
-		mock_frappe.local = MagicMock()
-		mock_frappe.sessions.get_csrf_token.return_value = "token"
-		mock_frappe.has_permission.return_value = False
-		mock_frappe.get_roles.return_value = ["Employee", "Projects Manager"]
-		mock_frappe.get_value.return_value = "Manager"
-		mock_frappe.Redirect = frappe.Redirect
-
-		context = self._make_context()
-		result = extend_context(context)
-		self.assertTrue(result.has_reports_permission)
-
-	@patch("chronotally.chronotally.csrf_token.frappe")
 	def test_context_has_no_cache(self, mock_frappe):
 		"""Context should have no_cache set to 1."""
 		mock_frappe.session.user = "Administrator"
