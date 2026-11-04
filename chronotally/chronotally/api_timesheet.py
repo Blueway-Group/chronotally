@@ -793,8 +793,7 @@ class _ReportSource:
 
 
 def _check_reports_access():
-	"""Reports expose company-wide financials; restrict them to manager roles.
-	"""
+	"""Reports expose company-wide financials; restrict them to manager roles."""
 	if not set(frappe.get_roles()) & set(REPORT_MANAGER_ROLES):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
