@@ -794,8 +794,6 @@ class _ReportSource:
 
 def _check_reports_access():
 	"""Reports expose company-wide financials; restrict them to manager roles.
-
-	Checked by hand rather than with frappe.only_for, which v15 skips while tests run.
 	"""
 	if not set(frappe.get_roles()) & set(REPORT_MANAGER_ROLES):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
@@ -1045,7 +1043,6 @@ def get_budget_at_risk(customer: str | None = None, project: str | None = None):
 		conditions.append(p.name == project)
 
 	query = frappe.qb.from_(b)
-	# ERPNext v16 stores budget_amount on the Budget; v15 on its Budget Account rows
 	if frappe.get_meta("Budget").has_field("budget_amount"):
 		budget = Sum(b.budget_amount)
 	else:

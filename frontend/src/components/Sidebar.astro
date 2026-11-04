@@ -81,8 +81,7 @@ const isActiveRoute = (itemPath: string) => {
       </a>
     </li>
 
-    <!-- Reports (manager roles only; rendered server-side by Frappe's Jinja) -->
-    <Fragment set:html="{% if has_reports_permission %}" />
+    <!-- Reports -->
     <li>
       <a
         href="/chronotally/reports"
@@ -96,7 +95,6 @@ const isActiveRoute = (itemPath: string) => {
         <span class="font-medium">Reports</span>
       </a>
     </li>
-    <Fragment set:html="{% endif %}" />
 
     <!-- Support -->
     <li>
