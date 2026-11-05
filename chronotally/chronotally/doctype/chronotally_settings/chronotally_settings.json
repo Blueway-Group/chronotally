@@ -1,11 +1,12 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-10-28 22:55:37.260142",
+ "creation": "2026-10-30 17:32:13.733029",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "default_period"
+  "default_period",
+  "budget_amount_field"
  ],
  "fields": [
   {
@@ -13,13 +14,21 @@
    "fieldtype": "Select",
    "label": "Default Calendar View",
    "options": "Work Week\nWork Month\nWork Day"
+  },
+  {
+   "default": "Total Costing Amount",
+   "description": "Project amount compared against its submitted Budget.",
+   "fieldname": "budget_amount_field",
+   "fieldtype": "Select",
+   "label": "Budget at Risk Amount",
+   "options": "Total Costing Amount\nTotal Billable Amount\nTotal Billed Amount"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-18 15:26:31.918138",
+ "modified": "2026-10-30 17:51:48.853586",
  "modified_by": "Administrator",
  "module": "chronotally",
  "name": "ChronoTally Settings",

@@ -66,6 +66,21 @@ const isActiveRoute = (itemPath: string) => {
       </a>
     </li>
 
+    <!-- Invoices -->
+    <li>
+      <a
+        href="/chronotally/invoices"
+        class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-base-300 ${
+          isActiveRoute('/invoices') ? 'active bg-primary text-primary-content' : ''
+        }`}
+      >
+        <span class="material-symbols-rounded text-xl">
+          receipt_long
+        </span>
+        <span class="font-medium">Invoices</span>
+      </a>
+    </li>
+
     <!-- Reports -->
     <li>
       <a

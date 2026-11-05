@@ -23,7 +23,7 @@ def extend_context(context):
 
 	if current_path.startswith("/chronotally"):
 		# Check if user has permission to create Sales Invoices
-		# This is the key permission check for accessing the reports/invoicing page
+		# This is the key permission check for accessing the invoicing page
 		has_invoice_permission = frappe.has_permission(
 			doctype="Sales Invoice", ptype="create", user=frappe.session.user
 		)
@@ -31,7 +31,7 @@ def extend_context(context):
 		if frappe.session.user == "Guest":
 			frappe.local.flags.redirect_location = "/login?redirect-to=" + current_path
 			raise frappe.Redirect
-		if current_path.startswith("/chronotally/reports") and not has_invoice_permission:
+		if current_path.startswith("/chronotally/invoices") and not has_invoice_permission:
 			# User doesn't have permission to create invoices, redirect to main page
 			frappe.local.flags.redirect_location = "/chronotally"
 			raise frappe.Redirect

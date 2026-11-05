@@ -86,11 +86,11 @@ class TestExtendContext(FrappeTestCase):
 		self.assertNotIn("csrf_token", result)
 
 	@patch("chronotally.chronotally.csrf_token.frappe")
-	def test_reports_without_permission_redirects(self, mock_frappe):
-		"""User without Sales Invoice permission should be redirected from /chronotally/reports."""
+	def test_invoices_without_permission_redirects(self, mock_frappe):
+		"""User without Sales Invoice permission should be redirected from /chronotally/invoices."""
 		mock_frappe.session.user = "test@example.com"
 		mock_frappe.request = MagicMock()
-		mock_frappe.request.path = "/chronotally/reports"
+		mock_frappe.request.path = "/chronotally/invoices"
 		mock_frappe.local = MagicMock()
 		mock_frappe.has_permission.return_value = False
 		mock_frappe.Redirect = frappe.Redirect

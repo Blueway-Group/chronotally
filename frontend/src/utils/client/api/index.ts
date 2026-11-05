@@ -44,3 +44,20 @@ export {
   type CreateInvoiceResponse,
   type Invoice
 } from './invoices.api'
+
+// Export all report API methods
+export {
+  getReportSummary,
+  getReportHoursChart,
+  getUnbilledByCustomer,
+  getBudgetAtRisk,
+  type ReportFilters,
+  type ReportGroupBy,
+  type ReportMeasure,
+  type ReportPeriod,
+  type ReportSummary,
+  type ReportHoursChart,
+  type UnbilledCustomer,
+  type BudgetAtRisk,
+  type BudgetAtRiskRow
+} from './reports.api'
