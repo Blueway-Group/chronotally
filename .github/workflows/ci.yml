@@ -5,11 +5,11 @@ name: CI
 on:
   push:
     branches:
-      - dev
+      - version-15
   pull_request:
 
 concurrency:
-  group: dev-chronotally-${{ github.event.number }}
+  group: chronotally-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
