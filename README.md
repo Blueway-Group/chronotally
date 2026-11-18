@@ -19,6 +19,9 @@ ChronoTally follows the standard Frappe branching convention. Each branch is a p
 
 - `version-16` — production for Frappe/ERPNext v16. Default branch; new work and PRs target this branch.
 - `version-15` — production for Frappe/ERPNext v15. Maintained with fixes backported from `version-16`.
+- `dev` — retired. Feature branches merge directly into `version-16`.
+
+> This `main` branch is deprecated. It mirrors `version-16` for installs that still use `--branch main`. Use `version-16` instead.
 
 For v15 installs use `--branch version-15`.
 
